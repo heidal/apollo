@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres:12.1
+    ports:
+      - 5432:5432
+    networks:
+      - apollo-network
+
+  app:
+    build:
+      dockerfile: docker/local/backend/Dockerfile
+      context: .
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+    networks:
+      - apollo-network
+
+networks:
+  apollo-network:
