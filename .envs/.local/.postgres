@@ -1,0 +1,3 @@
+POSTGRES_DB=apollo
+POSTGRES_USER=apollo
+POSTGRES_PASSWORD=apollo
