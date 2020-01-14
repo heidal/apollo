@@ -139,3 +139,5 @@ STATIC_ROOT = str(BASE_DIR.path('shared/static'))
 
 # https://docs.djangoproject.com/en/3.0/topics/db/transactions/#tying-transactions-to-http-requests
 ATOMIC_REQUESTS = True
+
+INTERNAL_IPS = ['127.0.0.1', '::1']
