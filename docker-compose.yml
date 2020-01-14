@@ -14,6 +14,8 @@ services:
     build:
       dockerfile: docker/local/backend/Dockerfile
       context: .
+    env_file:
+      - .envs/.local/.django
     ports:
       - 8000:8000
     depends_on:
