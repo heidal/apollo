@@ -17,6 +17,7 @@ COPY ./docker/local/backend/entrypoint.sh /entrypoint.sh
 COPY ./docker/local/backend/start.sh /start.sh
 
 RUN useradd --create-home --uid $USER_ID django
+USER django
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/start.sh"]
