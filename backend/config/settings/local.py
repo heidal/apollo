@@ -1,11 +1,16 @@
+import socket
+
 from .base import *
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-THIRD_PARTY_APPS += [
+INSTALLED_APPS += [
     'debug_toolbar'
 ]
 
-MIDDLEWARE += [
+MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
-]
+] + MIDDLEWARE
+
+ip = socket.gethostbyname(socket.gethostname())
+INTERNAL_IPS += [ip[:-1] + "1"]
