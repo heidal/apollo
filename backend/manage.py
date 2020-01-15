@@ -16,6 +16,9 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    sys.path.append(os.path.join(current_path, "backend"))
+
 
 if __name__ == '__main__':
     main()

@@ -18,6 +18,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from apollo.users import urls as users_urls
+
 urlpatterns = []
 
 if settings.DEBUG:
@@ -30,5 +32,7 @@ if settings.DEBUG:
 
 urlpatterns += [
     path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+urlpatterns += users_urls.urlpatterns
