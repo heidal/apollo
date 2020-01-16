@@ -1,0 +1,5 @@
+DJANGO_SETTINGS_MODULE=config.settings.local
+DJANGO_SETTINGS_MODULE_TEST=config.settings.test
+
+POSTGRES_HOST=db
+POSTGRES_PORT=5432

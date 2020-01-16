@@ -11,12 +11,13 @@ RUN poetry config virtualenvs.create false
 COPY ./backend /app
 WORKDIR /app
 
-RUN poetry update && poetry install
+RUN poetry install
 
 COPY ./docker/local/backend/entrypoint.sh /entrypoint.sh
 COPY ./docker/local/backend/start.sh /start.sh
 
 RUN useradd --create-home --uid $USER_ID django
+RUN chown -R django:django /home/django
 USER django
 
 ENTRYPOINT ["/entrypoint.sh"]
