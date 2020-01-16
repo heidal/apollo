@@ -1,5 +1,4 @@
 class PytestTestRunner:
-
     def __init__(
         self,
         pattern=None,
