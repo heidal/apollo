@@ -25,14 +25,12 @@ urlpatterns = []
 if settings.DEBUG:
     import debug_toolbar
 
-    urlpatterns += [
-        path('__debug__/', include(debug_toolbar.urls))
-    ]
+    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
 
 
 urlpatterns += [
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
+    path("admin/", admin.site.urls),
+    path("api-auth/", include("rest_framework.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += users_urls.urlpatterns
