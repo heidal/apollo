@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import environ
 
+env = environ.Env()
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
 
@@ -43,6 +45,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "django_extensions",
     "rest_framework",
+    "social_django",
 ]
 
 PROJECT_APPS = ["apollo.users.apps.UsersConfig"]
@@ -59,6 +62,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "social_core.backends.open_id.OpenIdAuth",
+    "social_core.backends.google.GoogleOpenId",
+    "social_core.backends.google.GoogleOAuth2",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -72,6 +82,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
+                "social_django.context_processors.login_redirect",
             ],
         },
     },
@@ -142,3 +154,8 @@ STATIC_ROOT = None
 ATOMIC_REQUESTS = True
 
 INTERNAL_IPS = ["127.0.0.1", "::1"]
+
+# SOCIAL_AUTH_LOGIN_ERROR_URL = "/"
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"
