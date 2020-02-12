@@ -17,6 +17,7 @@ services:
     env_file:
       - .envs/.local/.django
       - .envs/.local/.postgres
+      - .envs/.local/.secret
     ports:
       - 8000:8000
     depends_on:
