@@ -6,6 +6,10 @@ from apollo.users.views import UserViewSet
 router = routers.DefaultRouter()
 router.register('users', UserViewSet)
 
-urlpatterns = [
+apipatterns = [
     path('', include(router.urls)),
+]
+
+urlpatterns = [
+    path('api/', include(apipatterns))
 ]
