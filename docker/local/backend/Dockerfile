@@ -1,5 +1,7 @@
 FROM python:3.8.1-slim
 
+EXPOSE 8000
+
 ARG USER_ID=1000
 ENV HOME=/home/django
 
