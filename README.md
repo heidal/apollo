@@ -12,5 +12,5 @@ https://eprint.iacr.org/2016/1037.pdf
 
 `docker-compose up`
 
-and visit `apollo.localhost` to visit main page or
-`apollo/localhost/api` to see the API.
+and visit `localhost` to visit main page or
+`localhost/api` to see the API.
