@@ -20,5 +20,5 @@ jobs:
       - run:
           name: Run backend tests
           command: |
-            docker-compose run --rm app python manage.py test --settings config.settings.test
+            docker-compose -f docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
   
