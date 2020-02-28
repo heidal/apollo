@@ -1,8 +1,8 @@
 version: 2
 jobs:
   build:
-    machine: true
     steps:
+      - setup_remote_docker
       - checkout
       - run:
           name: Run backend tests
