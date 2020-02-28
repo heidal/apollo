@@ -15,44 +15,7 @@ services:
     env_file:
       - .envs/.local/.django
       - .envs/.local/.postgres
-      - .envs/.local/.secret
-    # ports:
-    #   - 8000:8000
+    ports:
+      - 8000:8000
     depends_on:
       - db
-    volumes:
-      - ./backend:/app
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.app.entrypoints=app"
-      # - "traefik.http.routers.app.priority=42"
-
-  web:
-    build:
-      dockerfile: docker/local/frontend/Dockerfile
-      context: .
-    depends_on: 
-      - app 
-    volumes:
-      - ./frontend:/app
-    ports: 
-      - 3000:3000
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`localhost`)"
-      - "traefik.http.services.web.loadbalancer.server.port=3000"
-      - "traefik.http.routers.web.entrypoints=app"
-
-  traefik:
-    image: traefik:v2.1
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.app.address=:80"
-    ports:
-      - 80:80
-      - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
