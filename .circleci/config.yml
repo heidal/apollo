@@ -1,14 +1,19 @@
 version: 2
+dependencies:
+  pre:
+    - pip install --upgrade pip
+    - pip install docker-compose
 jobs:
   build:
-    machine:
-      pre:
-        - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
-        - pip install --upgrade pip
-        - pip install docker-compose
+    machine: true
+    # machine:
+    #   pre:
+    #     - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
+    #     - pip install --upgrade pip
+    #     - pip install docker-compose
     
-      services:
-        - docker
+      # services:
+      #   - docker
       
     steps:
       - checkout
