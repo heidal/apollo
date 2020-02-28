@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: Run backend tests
+          command: |
+            docker-compose run --rm app python manage.py test --settings config.settings.test
+  
