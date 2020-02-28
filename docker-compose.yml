@@ -24,7 +24,7 @@ services:
       - ./backend:/app
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`apollo.localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/api`)"
       - "traefik.http.routers.app.entrypoints=app"
       # - "traefik.http.routers.app.priority=42"
 
@@ -43,7 +43,7 @@ services:
       - 19006:19006
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`apollo.localhost`)"
+      - "traefik.http.routers.web.rule=Host(`localhost`)"
       - "traefik.http.services.web.loadbalancer.server.port=19006"
       - "traefik.http.routers.web.entrypoints=app"
 

@@ -20,18 +20,22 @@ from django.conf.urls.static import static
 
 from apollo.users import urls as users_urls
 
-urlpatterns = []
+apipatterns = []
 
 if settings.DEBUG:
     import debug_toolbar
 
-    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
+    apipatterns += [path("__debug__/", include(debug_toolbar.urls))]
 
 
-urlpatterns += [
+apipatterns += [
     path("admin/", admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
     path('', include("social_django.urls", namespace="social"))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-urlpatterns += users_urls.urlpatterns
+apipatterns += users_urls.urlpatterns
+
+urlpatterns = [
+    path('api/', include(apipatterns))
+]
