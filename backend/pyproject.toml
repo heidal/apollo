@@ -33,6 +33,7 @@ pytest-faker = "~=2.0.0"
 pytest-mock = "~=1.11.1"
 pytest-pudb = "~=0.7.0"
 pytest-factoryboy = "~=2.0.3"
+black = "^19.10b0"
 
 [build-system]
 requires = ["poetry>=0.12"]

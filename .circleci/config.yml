@@ -13,6 +13,10 @@ jobs:
           command: |
             docker-compose -f docker-compose-ci.yml build
       - run:
+          name: Run black on backend
+          command: |
+            docker-compose -f docker-compose-ci.yml run --rm app black --check .
+      - run:
           name: Run backend tests
           command: |
             docker-compose -f docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test

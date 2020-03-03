@@ -31,11 +31,9 @@ if settings.DEBUG:
 apipatterns += [
     path("admin/", admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
-    path('', include("social_django.urls", namespace="social"))
+    path("", include("social_django.urls", namespace="social")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 apipatterns += users_urls.urlpatterns
 
-urlpatterns = [
-    path('api/', include(apipatterns))
-]
+urlpatterns = [path("api/", include(apipatterns))]
