@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from typing import List
+
 import environ
 
 env = environ.Env()
@@ -28,7 +30,7 @@ SECRET_KEY = "beoyxw()b6peq#$@x10tv&#-m5e8$r(l-&t$gue^t8!q%4kpun"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: List[str] = []
 
 
 # Application definition
@@ -156,6 +158,6 @@ ATOMIC_REQUESTS = True
 INTERNAL_IPS = ["127.0.0.1", "::1"]
 
 # SOCIAL_AUTH_LOGIN_ERROR_URL = "/"
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", default="")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", default="")
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"
