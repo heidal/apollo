@@ -30,6 +30,7 @@ apipatterns += [
     path("rest-auth/", include("rest_auth.urls")),
     path("rest-auth/registration/", include("rest_auth.registration.urls")),
     path("users/", include("apollo.users.urls", namespace="users")),
+    path("elections/", include("apollo.elections.urls", namespace="elections")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns = [path("api/", include(apipatterns))]
