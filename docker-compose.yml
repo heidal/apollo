@@ -16,8 +16,8 @@ services:
       - .envs/.local/.django
       - .envs/.local/.postgres
       - .envs/.local/.secret
-    # ports:
-    #   - 8000:8000
+    ports:
+       - 8000:8000
     depends_on:
       - db
     volumes:
@@ -27,6 +27,7 @@ services:
       - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/api`)"
       - "traefik.http.routers.app.entrypoints=app"
       # - "traefik.http.routers.app.priority=42"
+    restart: on-failure
 
   web:
     build:

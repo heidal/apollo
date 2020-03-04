@@ -1,0 +1,27 @@
+version: 2
+dependencies:
+  pre:
+    - pip install --upgrade pip
+    - pip install docker-compose
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Build images
+          command: |
+            docker-compose -f docker-compose-ci.yml build
+      - run:
+          name: Run black on backend
+          command: |
+            docker-compose -f docker-compose-ci.yml run --rm app black --check .
+      - run:
+          name: Mypy static analysis
+          command: |
+            docker-compose -f docker-compose-ci.yml run --rm app mypy apollo
+      - run:
+          name: Run backend tests
+          command: |
+            docker-compose -f docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
+  
