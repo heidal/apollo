@@ -37,12 +37,11 @@ services:
       - app 
     volumes:
       - ./frontend:/app
-    ports: 
-      - 3000:3000
+    ports:
+      - 5000:8080
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web.rule=Host(`localhost`)"
-      - "traefik.http.services.web.loadbalancer.server.port=3000"
       - "traefik.http.routers.web.entrypoints=app"
 
   traefik:
