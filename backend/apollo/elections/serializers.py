@@ -1,11 +1,13 @@
-from .models import Answer, Election, Question
 from rest_framework import serializers
 
+from apollo.elections.models import Answer, Election, Question
 
-class AnswerSerializer(serializers.HyperlinkedModelSerializer):
+
+class ElectionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Answer
-        fields = ["text", "votes"]
+        model = Election
+        fields = ["description", "questions", "title"]
+        depth = 3
 
 
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
@@ -14,8 +16,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["answers", "question"]
 
 
-class ElectionSerializer(serializers.HyperlinkedModelSerializer):
+class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Election
-        fields = ["description", "questions", "title"]
-        depth = 3
+        model = Answer
+        fields = ["text", "votes"]
