@@ -42,12 +42,17 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
 ]
 
 THIRD_PARTY_APPS = [
     "django_extensions",
     "rest_framework",
-    "social_django",
+    "rest_framework.authtoken",
+    "allauth",
+    "allauth.account",
+    "rest_auth",
+    "rest_auth.registration",
 ]
 
 PROJECT_APPS = ["apollo.users.apps.UsersConfig"]
@@ -65,9 +70,6 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "social_core.backends.open_id.OpenIdAuth",
-    "social_core.backends.google.GoogleOpenId",
-    "social_core.backends.google.GoogleOAuth2",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -84,8 +86,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "social_django.context_processors.backends",
-                "social_django.context_processors.login_redirect",
             ],
         },
     },
@@ -155,9 +155,6 @@ STATIC_ROOT = None
 # https://docs.djangoproject.com/en/3.0/topics/db/transactions/#tying-transactions-to-http-requests
 ATOMIC_REQUESTS = True
 
-INTERNAL_IPS = ["127.0.0.1", "::1"]
+SITE_ID = 1
 
-# SOCIAL_AUTH_LOGIN_ERROR_URL = "/"
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", default="")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", default="")
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"
+INTERNAL_IPS = ["127.0.0.1", "::1"]
