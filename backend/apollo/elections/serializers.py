@@ -4,6 +4,10 @@ from apollo.elections.models import Answer, Election, Question
 
 
 class ElectionSerializer(serializers.HyperlinkedModelSerializer):
+    questions = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Question.objects.all()
+    )
+
     class Meta:
         model = Election
         fields = ["description", "questions", "title"]
@@ -11,6 +15,10 @@ class ElectionSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
+    answers = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Answer.objects.all()
+    )
+
     class Meta:
         model = Question
         fields = ["answers", "question"]
