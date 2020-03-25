@@ -1,7 +1,16 @@
-from rest_framework import generics, viewsets
+from rest_framework import viewsets
 
-from apollo.elections.models import Election, Question
-from apollo.elections.serializers import ElectionSerializer, QuestionSerializer
+from apollo.elections.models import Answer, Election, Question
+from apollo.elections.serializers import (
+    AnswerSerializer,
+    ElectionSerializer,
+    QuestionSerializer,
+)
+
+
+class AnswerViewSet(viewsets.ModelViewSet):
+    queryset = Answer.objects.all()
+    serializer_class = AnswerSerializer
 
 
 class ElectionViewSet(viewsets.ModelViewSet):
@@ -9,11 +18,6 @@ class ElectionViewSet(viewsets.ModelViewSet):
     serializer_class = ElectionSerializer
 
 
-class ElectionDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Election.objects.all()
-    serializer_class = ElectionSerializer
-
-
-class QuestionDetail(generics.RetrieveUpdateDestroyAPIView):
+class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer

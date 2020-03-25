@@ -1,14 +1,13 @@
-from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from apollo.elections.views import ElectionDetail, ElectionViewSet, QuestionDetail
+from apollo.elections.views import AnswerViewSet, ElectionViewSet, QuestionViewSet
 
+
+app_name = "elections"
 
 router = DefaultRouter()
+router.register("answers", AnswerViewSet)
 router.register("elections", ElectionViewSet)
+router.register("questions", QuestionViewSet)
 
-urlpatterns = [
-    path("question/<int:pk>", QuestionDetail.as_view(), name="questions"),
-    path("election/<int:pk>", ElectionDetail.as_view(), name="election_detail"),
-    path("", include(router.urls)),
-]
+urlpatterns = router.urls
