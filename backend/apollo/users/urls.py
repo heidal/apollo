@@ -3,9 +3,9 @@ from rest_framework import routers
 
 from apollo.users.views import UserViewSet
 
+app_name = "users"
+
 router = routers.DefaultRouter()
 router.register("users", UserViewSet)
 
-urlpatterns = [
-    path("", include(router.urls)),
-]
+urlpatterns = router.urls
