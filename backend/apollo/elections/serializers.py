@@ -4,10 +4,6 @@ from apollo.elections.models import Answer, Election, Question
 
 
 class ElectionSerializer(serializers.ModelSerializer):
-    questions = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Question.objects.all()
-    )
-
     class Meta:
         model = Election
         fields = ["description", "questions", "title"]
@@ -15,16 +11,17 @@ class ElectionSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    answers = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Answer.objects.all()
-    )
+    election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all())
 
     class Meta:
         model = Question
-        fields = ["answers", "question"]
+        fields = ["answers", "election", "question"]
 
 
 class AnswerSerializer(serializers.ModelSerializer):
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+
     class Meta:
         model = Answer
-        fields = ["text", "votes"]
+        fields = ["text", "votes", "question"]
+        read_only_fields = ["votes"]
