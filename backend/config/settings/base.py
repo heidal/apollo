@@ -55,7 +55,10 @@ THIRD_PARTY_APPS = [
     "rest_auth.registration",
 ]
 
-PROJECT_APPS = ["apollo.users.apps.UsersConfig", "apollo.elections.apps.ElectionsConfig"]
+PROJECT_APPS = [
+    "apollo.users.apps.UsersConfig",
+    "apollo.elections.apps.ElectionsConfig",
+]
 
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
