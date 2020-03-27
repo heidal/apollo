@@ -7,8 +7,15 @@ import router from "./router";
 import VueAxios from 'vue-axios'
 import axios from 'axios';
 
+import { makeServer } from "./server";
+
 
 Vue.config.productionTip = false;
+
+if (process.env.NODE_ENV === "development") {
+  makeServer();
+}
+
 Vue.use(VueAxios, axios)
 Vue.use(Vuex);
 Vue.use(VueCookies);
@@ -20,12 +27,21 @@ const store = new Vuex.Store({
   },
   mutations: {
     setSessionKey(state, sessionKey: string) {
+      Vue.$cookies.set("sessionKey", sessionKey);
       state.sessionKey = sessionKey;
     }
   },
   getters: {
     isAuthenticated: state => {
-      return state.sessionKey !== null;
+      if (state.sessionKey === null) {
+        const sessionKey = Vue.$cookies.get("sessionKey");
+        if (sessionKey === null) {
+          return false;
+        }
+        state.sessionKey = sessionKey;
+        return true;
+      }
+      return true;
     }
   }
 })
