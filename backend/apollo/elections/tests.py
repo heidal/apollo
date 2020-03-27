@@ -4,9 +4,14 @@ from rest_framework.reverse import reverse
 from rest_framework import status
 from apollo.elections.models import Election
 from django.contrib.auth.models import User
+from django.http import HttpResponse
+from typing_extensions import TypedDict
 
 
-def _create_election(election_data, user):
+ElectionPostData = TypedDict("ElectionPostData", {"description": str, "title": str})
+
+
+def _create_election(election_data: ElectionPostData, user: User) -> HttpResponse:
     api_client = APIClient()
     api_client.force_authenticate(user=user)
     return api_client.post(
@@ -15,12 +20,16 @@ def _create_election(election_data, user):
 
 
 @mark.django_db
-def test_create_election():
-    election_data = {"description": "Election description", "title": "Election title"}
+def test_create_election() -> None:
+    election_data: ElectionPostData = {
+        "description": "Election description",
+        "title": "Election title",
+    }
     user = User.objects.create()
     response = _create_election(election_data, user)
     assert response.status_code == status.HTTP_201_CREATED
     election = Election.objects.last()
+    assert election is not None
     assert all(
         (
             election.description == election_data["description"],
