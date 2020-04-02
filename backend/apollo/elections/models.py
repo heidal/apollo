@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -5,6 +6,7 @@ class Election(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
     title = models.CharField(max_length=200)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="elections")
 
     class Meta:
         ordering = ["created_at"]
