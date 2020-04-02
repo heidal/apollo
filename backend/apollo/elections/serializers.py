@@ -1,12 +1,15 @@
 from rest_framework import serializers
+from rest_framework.fields import CurrentUserDefault
 
 from apollo.elections.models import Answer, Election, Question
 
 
 class ElectionSerializer(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=CurrentUserDefault())
+
     class Meta:
         model = Election
-        fields = ["description", "questions", "title"]
+        fields = ["id", "description", "questions", "title", "author"]
         depth = 3
 
 
@@ -15,7 +18,8 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ["answers", "election", "question"]
+        fields = ["id", "answers", "election", "question"]
+        read_only_fields = ["answers"]
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -23,5 +27,5 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ["text", "votes", "question"]
+        fields = ["id", "text", "votes", "question"]
         read_only_fields = ["votes"]

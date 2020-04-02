@@ -1,11 +1,6 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link>|
-      <router-link to="/users">Users</router-link>|
-      <router-link v-if="!this.$store.getters.isAuthenticated" to="/login">Login</router-link>
-      <router-link v-else to="/logout">Logout</router-link>
-    </div>
+    <NavBar />
     <router-view />
   </div>
 </template>
@@ -17,6 +12,9 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  padding-top: 1em;
+  padding-left: 5em;
+  padding-right: 5em;
 }
 
 #nav {
@@ -32,3 +30,13 @@
   }
 }
 </style>
+
+<script lang="ts">
+import Vue from 'vue';
+import NavBar from "@/components/NavBar.vue";
+export default Vue.extend({
+  components: {
+    NavBar
+  }
+})
+</script>
