@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
+from rest_framework.validators import UniqueTogetherValidator
 
-from apollo.elections.models import Answer, Election, Question
+from apollo.elections.models import Answer, Election, Question, Vote
 
 
 class ElectionSerializer(serializers.ModelSerializer):
@@ -29,3 +30,18 @@ class AnswerSerializer(serializers.ModelSerializer):
         model = Answer
         fields = ["id", "text", "votes", "question"]
         read_only_fields = ["votes"]
+
+
+class VoteSerializer(serializers.ModelSerializer):
+    answer = serializers.PrimaryKeyRelatedField(queryset=Answer.objects.all())
+    author = serializers.HiddenField(default=CurrentUserDefault())
+
+    class Meta:
+        model = Vote
+        fields = ["id", "answer", "author"]
+        read_only_fields = ["id"]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Vote.objects.all(), fields=["author", "answer"]
+            )
+        ]

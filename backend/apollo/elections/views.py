@@ -1,15 +1,16 @@
 from typing import List
 
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from apollo.common.permissions import get_default_permission_classes
-from apollo.elections.models import Answer, Election, Question
+from apollo.elections.models import Answer, Election, Question, Vote
 from apollo.elections.permissions import CanAddQuestion, CanAddAnswer
 from apollo.elections.serializers import (
     AnswerSerializer,
     ElectionSerializer,
     QuestionSerializer,
+    VoteSerializer,
 )
 
 
@@ -40,3 +41,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
             permission_classes += [CanAddQuestion]
 
         return [perm() for perm in permission_classes]
+
+
+class VoteViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer

@@ -1,12 +1,13 @@
 from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 from typing_extensions import TypedDict
 
 from pytest import mark, fixture
 
-from apollo.elections.models import Election, Question, Answer
+from apollo.elections.models import Question, Answer
 
 AnswerPostData = TypedDict("AnswerPostData", {"text": str, "question": int})
 
@@ -16,7 +17,7 @@ def answer_data(question: Question) -> AnswerPostData:
     return {"question": question.id, "text": "General Kenobi"}
 
 
-def _create_answer(answer_data: AnswerPostData, user: User):
+def _create_answer(answer_data: AnswerPostData, user: User) -> Response:
     api_client = APIClient()
     api_client.force_authenticate(user=user)
     return api_client.post(

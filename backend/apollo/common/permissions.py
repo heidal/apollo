@@ -1,4 +1,4 @@
-from typing import List, Type, TypeVar
+from typing import List, TypeVar
 
 from rest_framework.permissions import BasePermission
 from rest_framework.settings import api_settings
