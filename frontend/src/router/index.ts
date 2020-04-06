@@ -1,10 +1,13 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Login from "../views/Login.vue";
-import Logout from "../views/Logout.vue";
-import Signup from "../views/Signup.vue";
-import LandingPage from "../views/LandingPage.vue";
-import ElectionCreationPage from "../views/ElectionCreationPage.vue";
+import Login from "@/views/Login.vue";
+import Logout from "@/views/Logout.vue";
+import Signup from "@/views/Signup.vue";
+import LandingPage from "@/views/LandingPage.vue";
+import ElectionCreationPage from "@/views/ElectionCreationPage.vue";
+import ElectionsPage from "@/views/ElectionsPage.vue";
+import ElectionDetailPage from "@/views/ElectionDetailPage.vue";
+import VotePage from "@/views/VotePage.vue";
 
 Vue.use(VueRouter);
 
@@ -30,9 +33,24 @@ const routes = [
     component: Signup
   },
   {
+    path: "/elections",
+    name: "Elections list",
+    component: ElectionsPage,
+  },
+  {
+    path: "/election-detail/:electionId",
+    name: "Election detail",
+    component: ElectionDetailPage,
+  },
+  {
     path: "/create-election",
     name: "Create Election",
     component: ElectionCreationPage,
+  },
+  {
+    path: "/vote/:electionId",
+    name: "Vote in Election",
+    component: VotePage,
   }
 ];
 

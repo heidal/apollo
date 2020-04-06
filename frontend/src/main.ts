@@ -16,9 +16,9 @@ if (process.env.NODE_ENV === "development") {
   makeServer();
 }
 
-Vue.use(VueAxios, axios)
-Vue.use(Vuex);
 Vue.use(VueCookies);
+Vue.use(VueAxios, axios);
+Vue.use(Vuex);
 
 
 const store = new Vuex.Store({
@@ -50,4 +50,14 @@ new Vue({
   router,
   store,
   render: h => h(App),
+  mounted () {
+    axios.interceptors.request.use(
+      config => {
+        // TODO make sure that the CSRFToken is not included in any requests going to external services.
+        config.headers["X-CSRFToken"] = this.$cookies.get("csrftoken");
+        return config;
+      },
+      error => Promise.reject(error)
+    )
+  }
 }).$mount("#app");

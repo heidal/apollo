@@ -49,20 +49,14 @@ export default Vue.extend({
   },
   methods: {
     loginWithPassword() {
-      this.$http
-        .post("/api/rest-auth/registration/", this.user, {
-          headers: {
-            "X-CSRFToken": this.$cookies.get("csrftoken")
-          }
-        })
-        .then(
-          response => {
-            this.$router.push("/login");
-          },
-          error => {
-            console.error(error);
-          }
-        );
+      this.$http.post("/api/rest-auth/registration/", this.user).then(
+        () => {
+          this.$router.push("/login");
+        },
+        error => {
+          console.error(error);
+        }
+      );
     }
   },
   computed: {

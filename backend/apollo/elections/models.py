@@ -1,5 +1,6 @@
-from django.contrib.auth.models import User
+from apollo.users.models import User
 from django.db import models
+from django.db.models import UniqueConstraint
 
 
 class Election(models.Model):
@@ -24,4 +25,14 @@ class Answer(models.Model):
         Question, on_delete=models.CASCADE, related_name="answers"
     )
     text = models.CharField(max_length=200)
-    votes = models.IntegerField(default=0)
+
+
+class Vote(models.Model):
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name="votes")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="votes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["answer", "author"], name="unique_answer_author")
+        ]

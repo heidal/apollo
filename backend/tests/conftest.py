@@ -1,8 +1,10 @@
 from pytest_factoryboy import register
-from factories import UserFactory, ElectionFactory, QuestionFactory
+import factories
 
-register(UserFactory)
-register(UserFactory, "other_user")
+register(factories.UserFactory)
+register(factories.UserFactory, "other_user")
 
-register(ElectionFactory)
-register(QuestionFactory)
+register(factories.ElectionFactory)
+register(factories.QuestionFactory)
+register(factories.AnswerFactory)
+register(factories.VoteFactory)
