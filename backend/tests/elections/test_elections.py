@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 from rest_framework import status
 from apollo.elections.models import Election
-from django.contrib.auth.models import User
+from apollo.users.models import User
 from django.http import HttpResponse
 from typing_extensions import TypedDict
 

@@ -155,11 +155,11 @@ button:hover {
           >Add another question</button>
         </div>
       </div>
-      <button type="submit" class="questions-submit"
+      <button
+        type="submit"
+        class="questions-submit"
         v-bind:class="questionsSubmitButton()"
-      >
-        Submit the questions!
-      </button>
+      >Submit the questions!</button>
     </form>
   </div>
 </template>
@@ -205,11 +205,7 @@ export default Vue.extend({
   methods: {
     createElection: function() {
       this.$http
-        .post("/api/elections/elections/", this.election, {
-          headers: {
-            "X-CSRFToken": this.$cookies.get("csrftoken")
-          }
-        })
+        .post("/api/elections/elections/", this.election)
         .then(response => {
           this.election.id = response.data.id;
           this.flow = Flow.Questions;
@@ -234,32 +230,34 @@ export default Vue.extend({
       });
     },
     submitQuestions: function() {
-      this.election.questions.map(question =>
-        this.$http
-          .post(
-            "/api/elections/questions/",
-            { question: question.question, election: this.election.id },
-            {
-              headers: { "X-CSRFToken": this.$cookies.get("csrftoken") }
-            }
-          )
-          .then(response => {
-            const questionId = response.data.id;
-            question.answers.map(answer =>
-              this.$http.post(
-                "/api/elections/answers/",
-                { text: answer.text, question: questionId },
-                {
-                  headers: { "X-CSRFToken": this.$cookies.get("csrftoken") }
-                }
-              )
-            );
-          })
+      const questionResponses = this.election.questions.map(question =>
+        this.$http.post("/api/elections/questions/", {
+          question: question.question,
+          election: this.election.id
+        })
       );
+      Promise.all(questionResponses).then(createdQuestions => {
+        const answerResponses = createdQuestions
+          .flatMap((question, i) =>
+            this.election.questions[i].answers.map(answer => ({
+              text: answer.text,
+              question: question.data.id
+            }))
+          )
+          .map(answerData =>
+            this.$http.post("/api/elections/answers/", answerData)
+          );
+
+        Promise.all(answerResponses).then(() => {
+          this.$router.push("/");
+        }, console.error);
+      });
     },
     questionsSubmitButton: function() {
       return {
-        hidden: this.election.questions[0].question === null || this.election.questions[0].question.length === 0
+        hidden:
+          this.election.questions[0].question === null ||
+          this.election.questions[0].question.length === 0
       };
     }
   }

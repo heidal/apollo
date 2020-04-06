@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from django.contrib.auth.models import User
+from apollo.users.models import User
 from pytest import mark, fixture
 from rest_framework import status
 from rest_framework.response import Response

@@ -5,31 +5,21 @@ from rest_framework.validators import UniqueTogetherValidator
 from apollo.elections.models import Answer, Election, Question, Vote
 
 
-class ElectionSerializer(serializers.ModelSerializer):
-    author = serializers.HiddenField(default=CurrentUserDefault())
-
-    class Meta:
-        model = Election
-        fields = ["id", "description", "questions", "title", "author"]
-        depth = 3
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all())
-
-    class Meta:
-        model = Question
-        fields = ["id", "answers", "election", "question"]
-        read_only_fields = ["answers"]
-
-
 class AnswerSerializer(serializers.ModelSerializer):
     question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
 
     class Meta:
         model = Answer
-        fields = ["id", "text", "votes", "question"]
-        read_only_fields = ["votes"]
+        fields = ["id", "text", "question"]
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all())
+    answers = AnswerSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Question
+        fields = ["id", "answers", "election", "question"]
 
 
 class VoteSerializer(serializers.ModelSerializer):
@@ -45,3 +35,12 @@ class VoteSerializer(serializers.ModelSerializer):
                 queryset=Vote.objects.all(), fields=["author", "answer"]
             )
         ]
+
+
+class ElectionSerializer(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=CurrentUserDefault())
+    questions = QuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Election
+        fields = ["id", "description", "questions", "title", "author"]

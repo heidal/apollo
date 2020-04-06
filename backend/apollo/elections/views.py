@@ -1,6 +1,8 @@
 from typing import List
 
+from django_filters import rest_framework as filters
 from rest_framework import viewsets, mixins
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from apollo.common.permissions import get_default_permission_classes
@@ -34,6 +36,10 @@ class ElectionViewSet(viewsets.ModelViewSet):
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ["election"]
+    ordering_fields = ["created_at"]
+    ordering = ["created_at"]
 
     def get_permissions(self) -> List[BasePermission]:
         permission_classes = get_default_permission_classes()

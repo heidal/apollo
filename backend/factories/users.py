@@ -1,5 +1,5 @@
 import factory
-from django.contrib.auth.models import User
+from apollo.users.models import User
 from faker import Factory as FakerFactory
 
 faker = FakerFactory.create()

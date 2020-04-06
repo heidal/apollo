@@ -34,7 +34,7 @@
   <div class="election-container">
     <div class="election-entry" v-for="election in getElections()" :key="election.id">
       <span class="election-title">
-        <h1>{{ election.title }}</h1>
+        <h1><router-link :to="'/election-detail/' + election.id">{{ election.title }}</router-link></h1>
         <p class="description">{{ election.description }}</p>
       </span>
       <p class="questions-count">{{ election.questionsCount }} questions to answer</p>

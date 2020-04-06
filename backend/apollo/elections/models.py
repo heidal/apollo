@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from apollo.users.models import User
 from django.db import models
 from django.db.models import UniqueConstraint
 
