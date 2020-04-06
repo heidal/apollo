@@ -23,7 +23,10 @@
         <input type="password" v-model="user.password" placeholder="Password" />
       </label>
       <button type="submit" class="submit">Submit</button>
-      <p>Or <router-link to="/signup">signup</router-link></p>
+      <p>
+        Or
+        <router-link to="/signup">signup</router-link>
+      </p>
     </form>
   </div>
 </template>
@@ -42,21 +45,15 @@ export default Vue.extend({
   },
   methods: {
     loginWithPassword() {
-      this.$http
-        .post("/api/rest-auth/login/", this.user, {
-          headers: {
-            "X-CSRFToken": this.$cookies.get("csrftoken")
-          }
-        })
-        .then(
-          response => {
-            this.$store.commit("setSessionKey", response.data.key);
-            this.$router.push("/");
-          },
-          error => {
-            console.error(error);
-          }
-        );
+      this.$http.post("/api/rest-auth/login/", this.user).then(
+        response => {
+          this.$store.commit("setSessionKey", response.data.key);
+          this.$router.push("/");
+        },
+        error => {
+          console.error(error);
+        }
+      );
     }
   },
   computed: {

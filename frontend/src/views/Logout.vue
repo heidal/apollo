@@ -27,28 +27,18 @@ import Vue from "vue";
 export default Vue.extend({
   methods: {
     logout() {
-      this.$http
-        .post(
-          "/api/rest-auth/logout/",
-          {},
-          {
-            headers: {
-              "X-CSRFToken": this.$cookies.get("csrftoken")
-            }
-          }
-        )
-        .then(
-          () => {
+      this.$http.post("/api/rest-auth/logout/").then(
+        () => {
+          this.$store.commit("setSessionKey", null);
+          this.$router.push("/");
+        },
+        error => {
+          if (error.response.status === 403) {
             this.$store.commit("setSessionKey", null);
             this.$router.push("/");
-          },
-          error => {
-            if (error.response.status === 403) {
-              this.$store.commit("setSessionKey", null);
-              this.$router.push("/");
-            }
           }
-        );
+        }
+      );
     }
   }
 });

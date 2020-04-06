@@ -24,6 +24,10 @@
   display: flex;
   padding-right: 3em;
   align-items: center;
+
+  a {
+    margin-left: 2em;
+  }
 }
 </style>
 
@@ -34,6 +38,7 @@
       <h1>Apollo</h1>
     </div>
     <div class="login-link">
+      <router-link to="/elections">Elections</router-link>
       <router-link v-if="!this.$store.getters.isAuthenticated" to="/login">Login</router-link>
       <router-link v-else to="/logout">Logout</router-link>
     </div>
