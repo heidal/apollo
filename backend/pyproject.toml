@@ -17,6 +17,8 @@ django-filter = "^=2.2.0"
 pydantic = "^1.4"
 django-rest-auth = {extras = ["with_social"], version = "^0.9.5"}
 django-allauth = "^0.41.0"
+pyyaml = "^5.3.1"
+uritemplate = "^3.0.1"
 
 
 [tool.poetry.dev-dependencies]
