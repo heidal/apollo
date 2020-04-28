@@ -1,4 +1,12 @@
 [[package]]
+category = "main"
+description = "Wraps the best available JSON implementation available in a common interface"
+name = "anyjson"
+optional = false
+python-versions = "*"
+version = "0.3.3"
+
+[[package]]
 category = "dev"
 description = "apipkg: namespace control and lazy-import mechanism"
 name = "apipkg"
@@ -316,6 +324,14 @@ Django = ">=1.11"
 
 [[package]]
 category = "main"
+description = "Django friendly finite state machine support."
+name = "django-fsm"
+optional = false
+python-versions = "*"
+version = "2.7.0"
+
+[[package]]
+category = "main"
 description = "Create a set of REST API endpoints for Authentication and Registration"
 name = "django-rest-auth"
 optional = false
@@ -346,6 +362,22 @@ version = "1.5.0"
 django = "*"
 mypy = ">=0.770,<0.780"
 typing-extensions = "*"
+
+[[package]]
+category = "main"
+description = "Django Utils is a module with some convenient utilities not included with the standard Django install"
+name = "django-utils2"
+optional = false
+python-versions = "*"
+version = "2.8.0"
+
+[package.dependencies]
+anyjson = ">=0.3.0"
+python-utils = ">=2.0.1"
+
+[package.extras]
+docs = ["django", "mock", "sphinx (>=1.7.2)"]
+tests = ["sphinx", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-flakes", "pytest-pep8", "jinja2", "pygments"]
 
 [[package]]
 category = "main"
@@ -896,6 +928,17 @@ six = ">=1.5"
 
 [[package]]
 category = "main"
+description = "Python Utils is a module with some convenient utilities not included with the standard Python install"
+name = "python-utils"
+optional = false
+python-versions = "*"
+version = "2.4.0"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
+category = "main"
 description = "OpenID support for modern servers and consumers."
 name = "python3-openid"
 optional = false
@@ -1175,10 +1218,12 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "3b230c2ba932fd4405ced677a9bd6869a50b869dceee240a2cbbfb5b4cf9d387"
 python-versions = "^3.8"
 
 [metadata.files]
+anyjson = [
+    {file = "anyjson-0.3.3.tar.gz", hash = "sha256:37812d863c9ad3e35c0734c42e0bf0320ce8c3bed82cd20ad54cb34d158157ba"},
+]
 apipkg = [
     {file = "apipkg-1.5-py2.py3-none-any.whl", hash = "sha256:58587dd4dc3daefad0487f6d9ae32b4542b185e1c36db6993290e7c41ca2b47c"},
     {file = "apipkg-1.5.tar.gz", hash = "sha256:37228cda29411948b422fae072f57e31d3396d2ee1c9783775980ee9c9990af6"},
@@ -1360,12 +1405,20 @@ django-filter = [
     {file = "django-filter-2.2.0.tar.gz", hash = "sha256:c3deb57f0dd7ff94d7dce52a047516822013e2b441bed472b722a317658cfd14"},
     {file = "django_filter-2.2.0-py3-none-any.whl", hash = "sha256:558c727bce3ffa89c4a7a0b13bc8976745d63e5fd576b3a9a851650ef11c401b"},
 ]
+django-fsm = [
+    {file = "django-fsm-2.7.0.tar.gz", hash = "sha256:9f42111814a273cdfd79cdf839f3596bc48b9cfe5fe5102293f07ade5b0048d5"},
+    {file = "django_fsm-2.7.0-py2.py3-none-any.whl", hash = "sha256:d5b0ca13965261f4fffad350fadd388dcfd9b6712399a84021073a40b161fbd7"},
+]
 django-rest-auth = [
     {file = "django-rest-auth-0.9.5.tar.gz", hash = "sha256:f11e12175dafeed772f50d740d22caeab27e99a3caca24ec65e66a8d6de16571"},
 ]
 django-stubs = [
     {file = "django-stubs-1.5.0.tar.gz", hash = "sha256:b4c9042f2c2fcb89dc0fb37df070cce0f9bf93b39ae193847b6e5a392b13c430"},
     {file = "django_stubs-1.5.0-py3-none-any.whl", hash = "sha256:4a03df70e062f4133085efc461148d0934f36ccfd60a2b6d7bc35821f62008b6"},
+]
+django-utils2 = [
+    {file = "django-utils2-2.8.0.tar.gz", hash = "sha256:750c9373fb70c1afbd4f7517f8395b983dcd15329567ff4382ca0a7a3042c007"},
+    {file = "django_utils2-2.8.0-py2.py3-none-any.whl", hash = "sha256:e5b7c02be51e39566305240af99adcbc473d93f4fd70fd5b495176466136dd9b"},
 ]
 djangorestframework = [
     {file = "djangorestframework-3.11.0-py3-none-any.whl", hash = "sha256:05809fc66e1c997fd9a32ea5730d9f4ba28b109b9da71fccfa5ff241201fd0a4"},
@@ -1622,6 +1675,10 @@ pytest-xdist = [
 python-dateutil = [
     {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},
     {file = "python_dateutil-2.8.1-py2.py3-none-any.whl", hash = "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"},
+]
+python-utils = [
+    {file = "python-utils-2.4.0.tar.gz", hash = "sha256:f21fc09ff58ea5ebd1fd2e8ef7f63e39d456336900f26bdc9334a03a3f7d8089"},
+    {file = "python_utils-2.4.0-py2.py3-none-any.whl", hash = "sha256:ebaadab29d0cb9dca0a82eab9c405f5be5125dbbff35b8f32cc433fa498dbaa7"},
 ]
 python3-openid = [
     {file = "python3-openid-3.1.0.tar.gz", hash = "sha256:628d365d687e12da12d02c6691170f4451db28d6d68d050007e4a40065868502"},

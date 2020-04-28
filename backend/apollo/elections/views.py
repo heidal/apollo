@@ -2,8 +2,11 @@ from typing import List
 
 from django_filters import rest_framework as filters
 from rest_framework import viewsets, mixins
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import SAFE_METHODS, BasePermission
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from apollo.common.permissions import get_default_permission_classes
 from apollo.elections.models import Answer, Election, Question, Vote
@@ -31,6 +34,14 @@ class AnswerViewSet(viewsets.ModelViewSet):
 class ElectionViewSet(viewsets.ModelViewSet):
     queryset = Election.objects.all()
     serializer_class = ElectionSerializer
+
+    @action(detail=True, url_path="open", methods=["post"])
+    def open_election(self, request: Request, pk: int = None) -> Response:
+        instance = self.get_object()
+        instance.open()
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class QuestionViewSet(viewsets.ModelViewSet):

@@ -1,3 +1,5 @@
+from pytest_factoryboy import LazyFixture
+
 from apollo.users.models import User
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -7,6 +9,7 @@ from typing_extensions import TypedDict
 from pytest import mark, fixture
 
 from apollo.elections.models import Election, Question
+
 
 QuestionPostData = TypedDict("QuestionPostData", {"question": str, "election": int})
 
@@ -66,3 +69,15 @@ def test_question_cannot_be_added_by_non_authorized_users(
     response = _create_question(question_data, other_user)
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert Question.objects.count() == old_questions_count
+
+
+@mark.django_db
+@mark.parametrize(
+    "_election", [LazyFixture("opened_election"), LazyFixture("frozen_election")]
+)
+def test_cannot_add_questions_to_election_if_not_state_created(
+    _election: Election, question_data: QuestionPostData, user: User
+) -> None:
+    response = _create_question(question_data, user)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    print(response.data)
