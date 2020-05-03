@@ -7,23 +7,23 @@ import django_fsm
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('elections', '0004_add_votes_model'),
+        ("elections", "0004_add_votes_model"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='election',
-            name='state',
-            field=django_fsm.FSMField(default='0', max_length=50),
+            model_name="election",
+            name="state",
+            field=django_fsm.FSMField(default="0", max_length=50),
         ),
         migrations.AddField(
-            model_name='election',
-            name='frozen_at',
+            model_name="election",
+            name="frozen_at",
             field=models.DateTimeField(null=True),
         ),
         migrations.AddField(
-            model_name='election',
-            name='opened_at',
+            model_name="election",
+            name="opened_at",
             field=models.DateTimeField(null=True),
         ),
     ]
