@@ -1,6 +1,6 @@
+from django.views import View
 from rest_framework import permissions
 from rest_framework.request import Request
-from rest_framework.views import APIView
 
 from apollo.elections.models import Election, Question, Answer
 from apollo.users.models import User
@@ -10,24 +10,34 @@ def can_edit_election(user: User, election: Election) -> bool:
     return election.state == Election.State.CREATED and user == election.author
 
 
-class CanEditElection(permissions.BasePermission):
-    def has_object_permission(self, request: Request, view: APIView, election: Election) -> bool:
-        return can_edit_election(request.user, election)
+class IsElectionFrozen(permissions.BasePermission):
+    def has_object_permission(
+        self, request: Request, view: View, election: Election
+    ) -> bool:
+        return election.state == Election.State.FROZEN
 
-    def has_permission(self, request, view):
-        """
-        This permission is disabled for the non-object validation.
-        """
-        return True
+
+class IsElectionAuthor(permissions.BasePermission):
+    def has_object_permission(
+        self, request: Request, view: View, election: Election
+    ) -> bool:
+        return election.author == request.user
+
+
+class IsElectionMutable(permissions.BasePermission):
+    def has_object_permission(
+        self, request: Request, view: View, election: Election
+    ) -> bool:
+        return election.state == Election.State.CREATED
 
 
 class CanAddQuestion(permissions.BasePermission):
     def has_object_permission(
-        self, request: Request, view: APIView, question: Question
+        self, request: Request, view: View, question: Question
     ) -> bool:
         return self.has_permission(request, view)
 
-    def has_permission(self, request: Request, view: APIView) -> bool:
+    def has_permission(self, request: Request, view: View) -> bool:
         election_id = request.data.get("election")
         if election_id is None:
             # if we returned False then the error message wouldn't
@@ -59,11 +69,11 @@ class CanAddAnswer(permissions.BasePermission):
     # the client will get an error code that is inappropriate for the reason of
     # the rejection (403 instead of 400).
     def has_object_permission(
-        self, request: Request, view: APIView, answer: Answer
+        self, request: Request, view: View, answer: Answer
     ) -> bool:
         return self.has_permission(request, view)
 
-    def has_permission(self, request: Request, view: APIView) -> bool:
+    def has_permission(self, request: Request, view: View) -> bool:
         question_id = request.data.get("question")
         if question_id is None:
             return True

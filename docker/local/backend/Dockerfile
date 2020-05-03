@@ -1,26 +1,25 @@
-FROM python:3.8.1-slim
+FROM python:3.8-alpine
 
 EXPOSE 8000
 
 ARG USER_ID=1000
 ENV HOME=/home/django
 
-RUN apt-get update && apt-get -yy install build-essential
+RUN apk add build-base libffi-dev openssl-dev git postgresql-dev bash
 
-RUN pip install poetry
-RUN poetry config virtualenvs.create false
-
-COPY ./backend /app
+RUN mkdir /app
 WORKDIR /app
 
-RUN poetry install
+COPY ./backend/requirements-dev.txt requirements.txt
+RUN pip install -r requirements.txt
 
 COPY ./docker/local/backend/entrypoint.sh /entrypoint.sh
 COPY ./docker/local/backend/start.sh /start.sh
 
-RUN useradd --create-home --uid $USER_ID django
-RUN chown -R django:django /home/django
+RUN addgroup -S django && adduser -S django -G django
 USER django
+
+COPY --chown=django:django ./backend /app
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/start.sh"]

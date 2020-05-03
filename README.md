@@ -23,6 +23,13 @@ and visit `localhost` to visit main page or
 `docker-compose run --rm app python manage.py shell_plus --ipython`
 
 
+### Adding new dependencies to the code
+
+For faster builds, we don't want to use `poetry` inside the container which in turn  has a downside of a somewhat
+convoluted way of adding new dependencies.
+
+For managing dependencies use `poetry` and while in `./backend` run `./poetry_to_pip.sh`.
+
 ### Troubleshooting
 
 ##### My `web` container doesn't get up

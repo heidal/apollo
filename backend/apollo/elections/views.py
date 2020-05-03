@@ -10,12 +10,20 @@ from rest_framework.response import Response
 
 from apollo.common.permissions import get_default_permission_classes
 from apollo.elections.models import Answer, Election, Question, Vote
-from apollo.elections.permissions import CanAddQuestion, CanAddAnswer
+from apollo.elections.permissions import (
+    CanAddQuestion,
+    CanAddAnswer,
+    IsElectionMutable,
+    IsElectionFrozen,
+    IsElectionAuthor,
+)
 from apollo.elections.serializers import (
     AnswerSerializer,
     ElectionSerializer,
     QuestionSerializer,
     VoteSerializer,
+    ElectionSummarySerializer,
+    ElectionTransitionSerializer,
 )
 
 
@@ -33,13 +41,44 @@ class AnswerViewSet(viewsets.ModelViewSet):
 
 class ElectionViewSet(viewsets.ModelViewSet):
     queryset = Election.objects.all()
-    serializer_class = ElectionSerializer
+
+    def get_permissions(self) -> List[BasePermission]:
+        permission_classes = get_default_permission_classes()
+        if self.action in ("update", "partial_update", "delete"):
+            permission_classes += [IsElectionAuthor & IsElectionMutable]  # type: ignore
+        elif self.action in ("summary",):
+            permission_classes += [IsElectionAuthor & IsElectionFrozen]  # type: ignore
+
+        return [perm() for perm in permission_classes]
+
+    def get_serializer_class(self):
+        if self.action == "summary":
+            return ElectionSummarySerializer
+        elif self.action in ("open_election", "freeze_election"):
+            return ElectionTransitionSerializer
+        return ElectionSerializer
 
     @action(detail=True, url_path="open", methods=["post"])
     def open_election(self, request: Request, pk: int = None) -> Response:
-        instance = self.get_object()
-        instance.open()
-        instance.save()
+        serializer = self.get_serializer(
+            self.get_object(), data={"state": Election.State.OPENED}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    @action(detail=True, url_path="freeze", methods=["post"])
+    def freeze_election(self, request: Request, pk: int = None) -> Response:
+        serializer = self.get_serializer(
+            self.get_object(), data={"state": Election.State.FROZEN}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    @action(detail=True, url_name="summary", methods=["get"])
+    def summary(self, request: Request, pk: int = None) -> Response:
+        instance: Election = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
