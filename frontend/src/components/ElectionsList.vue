@@ -58,6 +58,7 @@ interface APIElection {
   questions: Array<any>;
 }
 
+// TODO separate the view from the logic
 export default Vue.extend({
   props: {
     pageSize: {
