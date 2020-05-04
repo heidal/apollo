@@ -1,4 +1,4 @@
-import factory
+import factory.fuzzy
 
 from apollo.elections.models import Election, Question, Vote, Answer
 from factories.users import UserFactory
@@ -10,6 +10,9 @@ class ElectionFactory(factory.django.DjangoModelFactory):
 
     title = factory.Faker("name")
     author = factory.SubFactory(UserFactory)
+    state = factory.fuzzy.FuzzyChoice(
+        choices=map(lambda x: x[0], Election.State.choices)
+    )
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):

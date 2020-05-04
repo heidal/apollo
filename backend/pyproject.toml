@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "helios-backend"
+name = "apollo-backend"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -19,6 +19,8 @@ django-rest-auth = {extras = ["with_social"], version = "^0.9.5"}
 django-allauth = "^0.41.0"
 pyyaml = "^5.3.1"
 uritemplate = "^3.0.1"
+django-fsm = "^2.7.0"
+django-utils2 = "^2.8.0"
 
 
 [tool.poetry.dev-dependencies]
@@ -41,6 +43,9 @@ black = "^19.10b0"
 django-stubs = "^1.4.0"
 ipython = "^7.13.0"
 faker = "^4.0.2"
+pytest-lazy-fixture = "^0.6.3"
+urllib3 = "^1.25.9"
+djangorestframework-stubs = {git = "https://github.com/typeddjango/djangorestframework-stubs"}
 
 [build-system]
 requires = ["poetry>=0.12"]

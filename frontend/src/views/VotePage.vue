@@ -3,17 +3,18 @@
     <h1>{{ election.title }}</h1>
     <p>{{ election.description }}</p>
     <div v-for="(question, i) in election.questions" :key="i">
-      <p>Question #{{ i }}</p>
+      <p>Question #{{ i + 1 }}</p>
+      <h3>{{ question.question }}</h3>
       <div v-for="(answer, ai) in question.answers" :key="ai">
         <input
           required
           type="radio"
-          :id="i + '.' + ai"
-          :name="'answer.' + i"
-          :value="question.id + '.' + answer.id"
+          :id="`${i}.${ai}`"
+          :name="`answer.${i}`"
+          :value="`${question.id}.${answer.id}`"
           v-model="votes[i].selected"
         />
-        <label :for="i + '.' + ai">{{ answer.text }}</label>
+        <label :for="`${i}.${ai}`">{{ answer.text }}</label>
         <br />
       </div>
     </div>
