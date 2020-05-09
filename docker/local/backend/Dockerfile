@@ -1,22 +1,33 @@
-FROM python:3.8-alpine
+FROM python:3.8-slim-buster
 
 EXPOSE 8000
 
 ARG USER_ID=1000
-ENV HOME=/home/django
+ENV HOME=/home/django \
+  PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  POETRY_VERSION=1.0.0
 
-RUN apk add build-base libffi-dev openssl-dev git postgresql-dev bash
+RUN apt-get update && apt-get install -yy git gcc
+#RUN apk add build-base libffi-dev openssl-dev git postgresql-dev bash
+RUN pip install poetry==1.0.5
 
 RUN mkdir /app
 WORKDIR /app
 
-COPY ./backend/requirements-dev.txt requirements.txt
-RUN pip install -r requirements.txt
+COPY ./backend/poetry.lock ./backend/pyproject.toml /app/
+
+RUN poetry config virtualenvs.create false
+RUN poetry install
 
 COPY ./docker/local/backend/entrypoint.sh /entrypoint.sh
 COPY ./docker/local/backend/start.sh /start.sh
 
-RUN addgroup -S django && adduser -S django -G django
+RUN useradd -u 1000 django
 USER django
 
 COPY --chown=django:django ./backend /app
