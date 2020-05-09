@@ -13,7 +13,6 @@ ENV HOME=/home/django \
   POETRY_VERSION=1.0.0
 
 RUN apt-get update && apt-get install -yy git gcc
-#RUN apk add build-base libffi-dev openssl-dev git postgresql-dev bash
 RUN pip install poetry==1.0.5
 
 RUN mkdir /app
