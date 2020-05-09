@@ -26,8 +26,12 @@ const store = new Vuex.Store({
     sessionKey: null as string | null
   },
   mutations: {
-    setSessionKey(state, sessionKey: string) {
-      Vue.$cookies.set("sessionKey", sessionKey);
+    setSessionKey(state, sessionKey: string | null) {
+      if (sessionKey === null) {
+        Vue.$cookies.remove("sessionKey");
+      } else {
+        Vue.$cookies.set("sessionKey", sessionKey);
+      }
       state.sessionKey = sessionKey;
     }
   },
@@ -35,7 +39,7 @@ const store = new Vuex.Store({
     isAuthenticated: state => {
       if (state.sessionKey === null) {
         const sessionKey = Vue.$cookies.get("sessionKey");
-        if (sessionKey === null) {
+        if (sessionKey == null) {
           return false;
         }
         state.sessionKey = sessionKey;
@@ -44,7 +48,7 @@ const store = new Vuex.Store({
       return true;
     }
   }
-})
+});
 
 new Vue({
   router,
