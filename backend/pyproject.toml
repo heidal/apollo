@@ -2,7 +2,7 @@
 name = "apollo-backend"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Konrad Świerczyński <konrad.swierczynski@protonmail.com>", "Adam Budziak <adambudziak@protonmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
