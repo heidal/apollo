@@ -81,6 +81,7 @@ class ElectionTransitionSerializer(serializers.ModelSerializer):
             transition_fn(self.instance)
         except django_fsm.TransitionNotAllowed:
             raise serializers.ValidationError("TRANSITION_NOT_ALLOWED")
+        return attrs
 
 
 class AnswerSummarySerializer(serializers.ModelSerializer):

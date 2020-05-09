@@ -4,7 +4,36 @@
     <p>{{ election.description }}</p>
     <p>A total of {{ election.questions.length }} questions</p>
     <p>and {{ election.questions.flatMap(q => q.answers).length }} answers</p>
-    <button v-on:click="voteInElection()">Vote in this election!</button>
+
+    <div v-if="election.is_owned">
+      <template v-if="election.state == 'CREATED'">
+        <h4>Election is not yet opened, you can edit or open it</h4>
+        <p><button v-on:click="editElection()">Edit election</button></p>
+        <p><button v-on:click="openElection()">Open election</button></p>
+      </template>
+      <template v-else-if="election.state == 'OPENED'">
+        <h4>Election is opened</h4>
+        <p><button v-on:click="voteInElection()">Vote in this election!</button></p>
+        <p><button v-on:click="closeElection()">Close election and count votes</button></p>
+      </template>
+      <template v-else-if="election.state == 'FROZEN'">
+        <h4>Election is closed</h4>
+        <p><button v-on:click="showElectionResults()">See election results</button></p>
+      </template>
+    </div>
+    <div v-else>
+      <template v-if="election.state == 'CREATED'">
+        <h4>Election is not yet opened</h4>
+      </template>
+      <template v-else-if="election.state == 'OPENED'">
+        <p><button v-on:click="voteInElection()">Vote in this election!</button></p>
+      </template>
+      <template v-else-if="election.state == 'FROZEN'">
+        <h4>Election is closed</h4>
+        <p><button v-on:click="showElectionResults()">See election results</button></p>
+      </template>>
+    </div>
+
   </div>
 </template>
 <script lang="ts">
@@ -25,11 +54,39 @@ export default Vue.extend({
     });
   },
   methods: {
+    editElection: function() {
+      alert("Editing election not implemented yet");
+    },
+    openElection: function() {
+      if (this.election === null) {
+        return;
+      }
+      this.$http.post(`/api/elections/elections/${this.election.id}/open/`, {})
+        .then(response => {
+          if (this.election !== null) {
+            this.election.state = "OPENED";
+          }
+        });
+    },
     voteInElection: function() {
       if (this.election === null) {
         return;
       }
       this.$router.push(`/vote/${this.election.id}`)
+    },
+    closeElection: function() {
+      if (this.election === null) {
+        return;
+      }
+      this.$http.post(`/api/elections/elections/${this.election.id}/freeze/`, {})
+        .then(response => {
+          if (this.election !== null) {
+            this.election.state = "FROZEN";
+          }
+        });
+    },
+    showElectionResults: function() {
+      alert("Election results not implemented yet");
     }
   }
 });

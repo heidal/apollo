@@ -75,7 +75,7 @@ export default Vue.extend({
     };
   },
   created: function() {
-    this.$http.get("/api/elections/elections").then(response => {
+    this.$http.get("/api/elections/elections/").then(response => {
       this.elections = response.data.results.map(
         (election: APIElection): ElectionPreview => {
           return {
