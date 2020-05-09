@@ -14,7 +14,7 @@ from apollo.elections.permissions import (
     CanAddQuestion,
     CanAddAnswer,
     IsElectionMutable,
-    IsElectionFrozen,
+    IsElectionClosed,
     IsElectionAuthor,
 )
 from apollo.elections.serializers import (
@@ -47,14 +47,14 @@ class ElectionViewSet(viewsets.ModelViewSet):
         if self.action in ("update", "partial_update", "delete"):
             permission_classes += [IsElectionAuthor & IsElectionMutable]  # type: ignore
         elif self.action in ("summary",):
-            permission_classes += [IsElectionAuthor & IsElectionFrozen]  # type: ignore
+            permission_classes += [IsElectionAuthor & IsElectionClosed]  # type: ignore
 
         return [perm() for perm in permission_classes]
 
     def get_serializer_class(self):
         if self.action == "summary":
             return ElectionSummarySerializer
-        elif self.action in ("open_election", "freeze_election"):
+        elif self.action in ("open_election", "close_election"):
             return ElectionTransitionSerializer
         return ElectionSerializer
 
@@ -67,10 +67,10 @@ class ElectionViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    @action(detail=True, url_path="freeze", methods=["post"])
-    def freeze_election(self, request: Request, pk: int = None) -> Response:
+    @action(detail=True, url_path="close", methods=["post"])
+    def close_election(self, request: Request, pk: int = None) -> Response:
         serializer = self.get_serializer(
-            self.get_object(), data={"state": Election.State.FROZEN}
+            self.get_object(), data={"state": Election.State.CLOSED}
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()

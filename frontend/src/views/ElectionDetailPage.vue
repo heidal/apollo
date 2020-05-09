@@ -16,7 +16,7 @@
         <p><button v-on:click="voteInElection()">Vote in this election!</button></p>
         <p><button v-on:click="closeElection()">Close election and count votes</button></p>
       </template>
-      <template v-else-if="election.state == 'FROZEN'">
+      <template v-else-if="election.state == 'CLOSED'">
         <h4>Election is closed</h4>
         <p><button v-on:click="showElectionResults()">See election results</button></p>
       </template>
@@ -28,12 +28,11 @@
       <template v-else-if="election.state == 'OPENED'">
         <p><button v-on:click="voteInElection()">Vote in this election!</button></p>
       </template>
-      <template v-else-if="election.state == 'FROZEN'">
+      <template v-else-if="election.state == 'CLOSED'">
         <h4>Election is closed</h4>
         <p><button v-on:click="showElectionResults()">See election results</button></p>
       </template>>
     </div>
-
   </div>
 </template>
 <script lang="ts">
@@ -64,7 +63,7 @@ export default Vue.extend({
       this.$http.post(`/api/elections/elections/${this.election.id}/open/`, {})
         .then(response => {
           if (this.election !== null) {
-            this.election.state = "OPENED";
+            this.election.state = response.data.state_string;
           }
         });
     },
@@ -78,10 +77,10 @@ export default Vue.extend({
       if (this.election === null) {
         return;
       }
-      this.$http.post(`/api/elections/elections/${this.election.id}/freeze/`, {})
+      this.$http.post(`/api/elections/elections/${this.election.id}/close/`, {})
         .then(response => {
           if (this.election !== null) {
-            this.election.state = "FROZEN";
+            this.election.state = response.data.state_string;
           }
         });
     },
