@@ -10,11 +10,11 @@ def can_edit_election(user: User, election: Election) -> bool:
     return election.state == Election.State.CREATED and user == election.author
 
 
-class IsElectionFrozen(permissions.BasePermission):
+class IsElectionClosed(permissions.BasePermission):
     def has_object_permission(
         self, request: Request, view: View, election: Election
     ) -> bool:
-        return election.state == Election.State.FROZEN
+        return election.state == Election.State.CLOSED
 
 
 class IsElectionAuthor(permissions.BasePermission):

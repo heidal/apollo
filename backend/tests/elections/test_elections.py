@@ -40,9 +40,9 @@ def _open_election(election: Election, user: User) -> Response:
     )
 
 
-def _freeze_election(election: Election, user: User) -> Response:
+def _close_election(election: Election, user: User) -> Response:
     return _post_endpoint(
-        reverse("elections:election-freeze-election", kwargs={"pk": election.pk}),
+        reverse("elections:election-close-election", kwargs={"pk": election.pk}),
         data=None,
         user=user,
     )
@@ -124,10 +124,10 @@ def test_simple_user_cannot_get_election_summary(
 @mark.parametrize(
     "_election, transition_function",
     [
-        (lazy_fixture("election"), _freeze_election),
+        (lazy_fixture("election"), _close_election),
         (lazy_fixture("opened_election"), _open_election),
         (lazy_fixture("frozen_election"), _open_election),
-        (lazy_fixture("frozen_election"), _freeze_election),
+        (lazy_fixture("frozen_election"), _close_election),
     ],
 )
 def test_invalid_election_transitions(
