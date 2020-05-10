@@ -15,5 +15,7 @@ export interface ApiElection {
   id: number,
   title: string,
   description: string,
-  questions: ApiQuestion[]
+  questions: ApiQuestion[],
+  state: "CREATED" | "OPENED" | "CLOSED",
+  is_owned: boolean
 }

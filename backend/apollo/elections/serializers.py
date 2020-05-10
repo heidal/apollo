@@ -67,11 +67,11 @@ class ElectionSerializer(serializers.ModelSerializer):
 class ElectionTransitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Election
-        fields = ["id", "state"]
+        fields = ["id", "state", "state_string"]
 
     STATE_CALLABLE_MAP = {
         Election.State.OPENED: Election.open,
-        Election.State.FROZEN: Election.freeze,
+        Election.State.CLOSED: Election.close,
     }
 
     def validate(self, attrs):
@@ -81,6 +81,7 @@ class ElectionTransitionSerializer(serializers.ModelSerializer):
             transition_fn(self.instance)
         except django_fsm.TransitionNotAllowed:
             raise serializers.ValidationError("TRANSITION_NOT_ALLOWED")
+        return attrs
 
 
 class AnswerSummarySerializer(serializers.ModelSerializer):

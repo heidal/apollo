@@ -10,7 +10,7 @@ register(factories.UserFactory, "other_user")
 
 register(factories.ElectionFactory, state=Election.State.CREATED)
 register(factories.ElectionFactory, "opened_election", state=Election.State.OPENED)
-register(factories.ElectionFactory, "frozen_election", state=Election.State.FROZEN)
+register(factories.ElectionFactory, "frozen_election", state=Election.State.CLOSED)
 
 
 register(factories.QuestionFactory)
