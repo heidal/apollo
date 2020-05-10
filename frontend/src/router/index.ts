@@ -7,6 +7,7 @@ import LandingPage from "@/views/LandingPage.vue";
 import ElectionCreationPage from "@/views/ElectionCreationPage.vue";
 import ElectionsPage from "@/views/ElectionsPage.vue";
 import ElectionDetailPage from "@/views/ElectionDetailPage.vue";
+import ElectionResults from "@/views/ElectionResults.vue";
 import VotePage from "@/views/VotePage.vue";
 
 Vue.use(VueRouter);
@@ -41,6 +42,11 @@ const routes = [
     path: "/election-detail/:electionId",
     name: "Election detail",
     component: ElectionDetailPage,
+  },
+  {
+    path: "/election-detail/:electionId/results",
+    name: "Election results",
+    component: ElectionResults,
   },
   {
     path: "/create-election",
