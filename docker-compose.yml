@@ -5,8 +5,6 @@ services:
     image: postgres:12.1
     env_file:
       - .envs/.local/.postgres
-    ports:
-      - 5432:5432
 
   app:
     build:
@@ -22,6 +20,8 @@ services:
       - db
     volumes:
       - ./backend:/app
+      - ../apollo-crypto/apollo-crypto-python:/apollo-crypto
+      - ../apollo-crypto/apollo-crypto-core:/apollo-crypto-core
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/api`)"
@@ -37,6 +37,8 @@ services:
       - app 
     volumes:
       - ./frontend:/app
+      - ../apollo-crypto/apollo-crypto-wasm:/apollo-crypto
+      - ../apollo-crypto/apollo-crypto-core:/apollo-crypto-core
     ports:
       - 5000:8080
     labels:

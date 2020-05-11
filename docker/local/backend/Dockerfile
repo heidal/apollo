@@ -12,8 +12,10 @@ ENV HOME=/home/django \
   PIP_DEFAULT_TIMEOUT=100 \
   POETRY_VERSION=1.0.0
 
-RUN apt-get update && apt-get install -yy git gcc
+RUN apt-get update && apt-get install -yy git gcc curl sudo
 RUN pip install poetry==1.0.5
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --profile minimal --default-toolchain nightly
 
 RUN mkdir /app
 WORKDIR /app
@@ -26,7 +28,13 @@ RUN poetry install
 COPY ./docker/local/backend/entrypoint.sh /entrypoint.sh
 COPY ./docker/local/backend/start.sh /start.sh
 
-RUN useradd -u 1000 django
+RUN useradd -m $USED_ID django \
+    && echo "django:django" | chpasswd \
+    && adduser django sudo \
+    && chsh django -s /bin/bash
+
+RUN chown -R django:django /home/django
+RUN echo 'export PATH=/home/django/.local/bin:/home/django/.cargo/bin:$PATH' >> /home/django/.bashrc
 USER django
 
 COPY --chown=django:django ./backend /app
