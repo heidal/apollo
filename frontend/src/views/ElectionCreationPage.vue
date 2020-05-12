@@ -165,7 +165,6 @@ button:hover {
 </template>
 <script lang="ts">
 import Vue from "vue";
-import {ElGamal, KeyGenerator} from "apollo-crypto";
 
 enum Flow {
   Election,

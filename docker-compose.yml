@@ -20,13 +20,11 @@ services:
       - db
     volumes:
       - ./backend:/app
-      - ../apollo-crypto/apollo-crypto-python:/apollo-crypto
-      - ../apollo-crypto/apollo-crypto-core:/apollo-crypto-core
+      - ./apollo-crypto:/apollo-crypto
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/api`)"
       - "traefik.http.routers.app.entrypoints=app"
-      # - "traefik.http.routers.app.priority=42"
     restart: on-failure
 
   web:
@@ -37,8 +35,7 @@ services:
       - app 
     volumes:
       - ./frontend:/app
-      - ../apollo-crypto/apollo-crypto-wasm:/apollo-crypto
-      - ../apollo-crypto/apollo-crypto-core:/apollo-crypto-core
+      - ./apollo-crypto:/apollo-crypto
     ports:
       - 5000:8080
     labels:

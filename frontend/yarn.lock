@@ -1619,11 +1619,7 @@ anymatch@~3.1.1:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-"apollo_crypto@link:../apollo-crypto/pkg":
-  version "0.0.0"
-  uid ""
-
-"apollo_crypto@link:/apollo-crypto/pkg":
+"apollo-crypto@file:../apollo-crypto/apollo-crypto-wasm/pkg":
   version "0.1.0"
 
 aproba@^1.1.1:

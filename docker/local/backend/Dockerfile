@@ -12,21 +12,7 @@ ENV HOME=/home/django \
   PIP_DEFAULT_TIMEOUT=100 \
   POETRY_VERSION=1.0.0
 
-RUN apt-get update && apt-get install -yy git gcc curl sudo
-RUN pip install poetry==1.0.5
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-    | sh -s -- -y --profile minimal --default-toolchain nightly
-
-RUN mkdir /app
-WORKDIR /app
-
-COPY ./backend/poetry.lock ./backend/pyproject.toml /app/
-
-RUN poetry config virtualenvs.create false
-RUN poetry install
-
-COPY ./docker/local/backend/entrypoint.sh /entrypoint.sh
-COPY ./docker/local/backend/start.sh /start.sh
+ENV PATH="/home/django/.local/bin:/home/django/.cargo/bin:${PATH}"
 
 RUN useradd -m $USED_ID django \
     && echo "django:django" | chpasswd \
@@ -34,8 +20,32 @@ RUN useradd -m $USED_ID django \
     && chsh django -s /bin/bash
 
 RUN chown -R django:django /home/django
-RUN echo 'export PATH=/home/django/.local/bin:/home/django/.cargo/bin:$PATH' >> /home/django/.bashrc
+
+RUN apt-get update && apt-get install -yy git gcc curl sudo
+
 USER django
+
+RUN pip install poetry==1.0.5 maturin==0.8.1
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --profile minimal --default-toolchain nightly
+
+COPY ./backend/poetry.lock ./backend/pyproject.toml /app/
+WORKDIR /app
+
+COPY --chown=django:django ./apollo-crypto /apollo-crypto
+
+RUN poetry config virtualenvs.create false
+
+USER root
+RUN poetry install
+
+USER django
+
+RUN pip install /apollo-crypto/apollo-crypto-python
+
+COPY ./docker/local/backend/entrypoint.sh /entrypoint.sh
+COPY ./docker/local/backend/start.sh /start.sh
 
 COPY --chown=django:django ./backend /app
 

@@ -15,6 +15,19 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "1.5"
 
 [[package]]
+category = "main"
+description = ""
+name = "apollo-crypto-python"
+optional = false
+python-versions = "*"
+version = "0.1.0"
+
+[package.source]
+reference = ""
+type = "file"
+url = "../apollo-crypto/target/wheels/apollo_crypto_python-0.1.0.tar.gz"
+
+[[package]]
 category = "dev"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 name = "appdirs"
@@ -407,6 +420,7 @@ typing-extensions = "*"
 reference = "673dc70790c671838db7b624a78a62cf4a7b7bd2"
 type = "git"
 url = "https://github.com/typeddjango/djangorestframework-stubs"
+
 [[package]]
 category = "dev"
 description = "execnet: rapid multi-Python deployment"
@@ -1246,7 +1260,7 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "19a410e8a8924446b221b7d9f272f379942e97616d9bd37d91009887ba7e29e1"
+content-hash = "0691ffd22ac8c906df57df4f0ddd453a214e5a6e18e847a5810040ca63e8ba63"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1256,6 +1270,9 @@ anyjson = [
 apipkg = [
     {file = "apipkg-1.5-py2.py3-none-any.whl", hash = "sha256:58587dd4dc3daefad0487f6d9ae32b4542b185e1c36db6993290e7c41ca2b47c"},
     {file = "apipkg-1.5.tar.gz", hash = "sha256:37228cda29411948b422fae072f57e31d3396d2ee1c9783775980ee9c9990af6"},
+]
+apollo-crypto-python = [
+    {file = "apollo_crypto_python-0.1.0.tar.gz", hash = "sha256:bf0f96035173a35bed42cf48d72764d004dc416fa86d5d536c312ad909dd50da"},
 ]
 appdirs = [
     {file = "appdirs-1.4.3-py2.py3-none-any.whl", hash = "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"},
