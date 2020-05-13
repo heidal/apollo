@@ -14,7 +14,6 @@ services:
     env_file:
       - .envs/.local/.django
       - .envs/.local/.postgres
-      - .envs/.local/.secret
 
   app:
     build:
