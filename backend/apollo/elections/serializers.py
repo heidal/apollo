@@ -54,6 +54,7 @@ class ElectionSerializer(serializers.ModelSerializer):
             "author",
             "is_owned",
             "state",
+            "public_key"
         ]
 
     def get_is_owned(self, election: Election) -> bool:

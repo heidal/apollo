@@ -4,6 +4,7 @@ from django_fsm import FSMField, transition
 from django_utils.choices import Choices, Choice
 
 from apollo.users.models import User
+import apollo_crypto
 
 
 class Election(models.Model):
@@ -19,6 +20,8 @@ class Election(models.Model):
     title = models.CharField(max_length=200)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="elections")
     state = FSMField(default=State.CREATED)
+    public_key = models.CharField(max_length=64, null=True, blank=False)
+    secret_key = models.CharField(max_length=64, null=True, blank=False)
 
     class Meta:
         ordering = ["created_at"]
@@ -45,6 +48,10 @@ class Election(models.Model):
         conditions=[can_be_opened],
     )
     def open(self) -> None:
+        key_generator = apollo_crypto.KeyGenerator()
+        key_pair = key_generator.generate()
+        self.secret_key = key_pair.secret_key()
+        self.public_key = key_pair.public_key()
         self.opened_at = now()
 
     @transition(field=state, source=State.OPENED, target=State.CLOSED)
