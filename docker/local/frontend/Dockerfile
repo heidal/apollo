@@ -4,7 +4,11 @@ EXPOSE 8080
 
 RUN apk add python3 py3-pip bash git
 
-COPY frontend /app
+USER node
+
+COPY --chown=node:node frontend /app/
+COPY --chown=node:node apollo-crypto /apollo-crypto
+
 WORKDIR /app
 RUN yarn install
 ENTRYPOINT ["yarn", "start"]

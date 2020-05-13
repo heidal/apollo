@@ -90,3 +90,14 @@ impl ElGamal {
         message.b64_serialize()
     }
 }
+
+#[wasm_bindgen]
+pub struct Test {
+    pub field: usize,
+    pub field2: usize,
+}
+
+#[wasm_bindgen]
+impl Test {
+    pub fn new() -> Test { Test { field: 10, field2: 20 } }
+}

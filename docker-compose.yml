@@ -6,6 +6,16 @@ services:
     env_file:
       - .envs/.local/.postgres
 
+  base:
+    build:
+      dockerfile: docker/local/base/Dockerfile
+      context: .
+    image: apollo-base
+    env_file:
+      - .envs/.local/.django
+      - .envs/.local/.postgres
+      - .envs/.local/.secret
+
   app:
     build:
       dockerfile: docker/local/backend/Dockerfile
@@ -20,7 +30,8 @@ services:
       - db
     volumes:
       - ./backend:/app
-      - ./apollo-crypto:/apollo-crypto
+      - ./apollo-crypto/apollo-crypto-python:/apollo-crypto-python
+      - ./apollo-crypto/apollo-crypto-core:/apollo-crypto-core
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/api`)"

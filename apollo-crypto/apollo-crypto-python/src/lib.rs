@@ -53,6 +53,8 @@ impl KeyGenerator {
     pub fn generate(&self) -> KeyPair {
         self.key_generator.generate().into()
     }
+
+    pub fn test(&self) -> usize { 5 }
 }
 
 #[pyclass]
