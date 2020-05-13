@@ -31,7 +31,7 @@
       <template v-else-if="election.state == 'CLOSED'">
         <h4>Election is closed</h4>
         <p><button v-on:click="showElectionResults()">See election results</button></p>
-      </template>>
+      </template>
     </div>
   </div>
 </template>
@@ -85,7 +85,10 @@ export default Vue.extend({
         });
     },
     showElectionResults: function() {
-      alert("Election results not implemented yet");
+      if (this.election === null) {
+        return;
+      }
+      this.$router.push(`/election-detail/${this.election.id}/results`);
     }
   }
 });

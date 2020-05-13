@@ -19,3 +19,18 @@ export interface ApiElection {
   state: "CREATED" | "OPENED" | "CLOSED",
   is_owned: boolean
 }
+
+export interface ApiElectionSummary {
+  id: number,
+  title: string,
+  description: string,
+  questions: {
+    id: number,
+    question: string,
+    answers: {
+      id: number,
+      votes: number,
+      text: string
+    }[]
+  }[]
+}
