@@ -47,10 +47,8 @@ jobs:
       - name: Tag & Push images
         if: github.event_name == 'push'
         run: |
-          docker tag apollo-base votifica/apollo-base:latest
           docker tag apollo_app votifica/apollo-app:latest
           docker tag apollo_web votifica/apollo-web:latest
 
-          docker push votifica/apollo-base:latest
           docker push votifica/apollo-app:latest
           docker push votifica/apollo-web:latest
