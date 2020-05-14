@@ -3,6 +3,11 @@
 https://eprint.iacr.org/2016/1037.pdf
 
 
+### Build the service
+
+First, you need to build the local base image by running `docker-compose build base`.
+
+
 ### Run tests
 
 `docker-compose run --rm app python manage.py test --settings config.settings.test`
@@ -17,6 +22,13 @@ or enter `./backend` and run `./run_all_tests.sh`
 and visit `localhost` to visit main page or
 `localhost/api` to see the API.
 
+
+### Hot reloading apollo-crypto
+
+Whenever you make changes in apollo-crypto and you want them to be reflected in backend or frontend, you need to compile the code appropriately.
+
+* To refresh the frontend enter `apollo-crypto-wasm` and run `wasm-pack build`.
+* To refresh the backend run `docker-compose exec app pip install /apollo-crypto-python`
 
 ### Enter django shell
 

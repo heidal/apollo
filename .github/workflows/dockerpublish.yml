@@ -28,6 +28,7 @@ jobs:
 
       - name: Build images
         run: |
+          docker-compose --file docker-compose-ci.yml build base
           docker-compose --file docker-compose-ci.yml build
 
       - name: Run black on backend
