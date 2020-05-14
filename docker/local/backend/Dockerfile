@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/apollo/apollo-base:latest
+FROM apollo-base
 
 EXPOSE 8000
 
