@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('elections', '0006_frozen_to_closed'),
+        ("elections", "0006_frozen_to_closed"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='election',
-            name='public_key',
+            model_name="election",
+            name="public_key",
             field=models.CharField(max_length=64, null=True),
         ),
         migrations.AddField(
-            model_name='election',
-            name='secret_key',
+            model_name="election",
+            name="secret_key",
             field=models.CharField(max_length=64, null=True),
         ),
     ]
