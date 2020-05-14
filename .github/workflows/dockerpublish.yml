@@ -22,6 +22,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Log into registry
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.DOCKER_TOKEN }}"
+
+      - name: Build and Push base if necessary
+        run: |
+          git diff --name-only HEAD^ | grep "backend/poetry.lock\|base/Dockerfile"
+          docker-compose --file docker-compose-ci.yml build base
+          docker tag apollo-base votifica/apollo-base:latest
+          docker push votifica/apollo-base:latest
+        continue-on-error: true
 
       - name: Build images
         run: |
@@ -38,11 +53,6 @@ jobs:
       - name: Run backend tests
         run: |
           docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
-
-      - name: Log into registry
-        run: |
-          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          echo "${{ secrets.DOCKER_TOKEN }}"
 
       - name: Tag & Push images
         if: github.event_name == 'push'
