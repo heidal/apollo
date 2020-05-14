@@ -41,9 +41,9 @@ jobs:
           docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
 
 
-   # Push image to GitHub Packages.
-   # See also https://docs.docker.com/docker-hub/builds/
-   push:
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
      # Ensure test job passes before pushing image.
      needs: test
      name: Push ${{ matrix.image_name }} to GitHub Packages
