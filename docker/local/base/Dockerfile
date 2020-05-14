@@ -31,3 +31,9 @@ USER django
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- -y --profile minimal --default-toolchain nightly
+
+USER root
+
+COPY ./backend/poetry.lock ./backend/pyproject.toml /app/
+RUN poetry config virtualenvs.create false
+RUN poetry install

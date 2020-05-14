@@ -119,7 +119,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "apollo",
         "USER": "apollo",
-        "PASSWORD": "apollo",
+        "PASSWORD": env("POSTGRES_PASSWORD", default="apollo"),
         "HOST": "db",
         "PORT": "5432",
     }

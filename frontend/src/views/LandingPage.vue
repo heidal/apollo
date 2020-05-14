@@ -35,7 +35,7 @@
 <script>
 // @ is an alias to /src
 import ElectionsList from "@/components/ElectionsList.vue";
-import { ElGamal, KeyGenerator, Test } from "apollo-crypto";
+import { ElGamal, KeyGenerator, Test } from "apollo_crypto";
 
 export default {
   name: "Home",
