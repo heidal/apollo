@@ -49,7 +49,7 @@ jobs:
      name: Push ${{ matrix.image_name }} to GitHub Packages
      strategy:
        matrix:
-         image_name: ['apollo-base', 'app', 'web']
+         image_name: ['apollo-base', 'apollo_app', 'apollo_web']
 
      runs-on: ubuntu-latest
      if: github.event_name == 'push'
@@ -82,5 +82,5 @@ jobs:
            echo IMAGE_ID=$IMAGE_ID
            echo VERSION=$VERSION
 
-           docker tag image $IMAGE_ID:$VERSION
+           docker tag ${{ matrix.image_name }} $IMAGE_ID:$VERSION
            docker push $IMAGE_ID:$VERSION
