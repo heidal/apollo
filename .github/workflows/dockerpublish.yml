@@ -25,7 +25,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose --file docker-compose-ci.yml build base app web
+          docker-compose --file docker-compose-ci.yml build app web
 
       - name: Run black on backend
         run: |
@@ -47,10 +47,10 @@ jobs:
       - name: Tag & Push images
         if: github.event_name == 'push'
         run: |
-          docker tag apollo-base votifica/${{ github.repository }}/base:latest
-          docker tag apollo_app votifica/${{ github.repository }}/app:latest
-          docker tag apollo_web votifica/${{ github.repository }}/web:latest
+          docker tag apollo-base votifica/apollo-base:latest
+          docker tag apollo_app votifica/apollo-app:latest
+          docker tag apollo_web votifica/apollo-web:latest
 
-          docker push votifica/${{ github.repository }}/base:latest
-          docker push votifica/${{ github.repository }}/app:latest
-          docker push votifica/${{ github.repository }}/web:latest
+          docker push votifica/apollo-base:latest
+          docker push votifica/apollo-app:latest
+          docker push votifica/apollo-web:latest
