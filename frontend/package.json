@@ -10,7 +10,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "apollo-crypto": "link:../apollo-crypto/apollo-crypto-wasm/pkg",
+    "apollo_crypto": "link:../apollo-crypto/apollo-crypto-wasm/pkg",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "es6-promise": "^4.2.8",

@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 01_middleware.yaml
+  - 02_services.yaml
+  - 03_deployments.yaml
+  - 04_ingress_routes.yaml
+configMapGenerator:
+  - name: apollo-env-file
+    env: .env_base
+secretGenerator:
+- name: apollo-secrets
+  env: secrets/.secret_base.env
+
+generatorOptions:
+  disableNameSuffixHash: true

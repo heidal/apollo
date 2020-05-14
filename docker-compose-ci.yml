@@ -25,3 +25,10 @@ services:
       - 8000:8000
     depends_on:
       - db
+
+  web:
+    build:
+      dockerfile: docker/local/frontend/Dockerfile
+      context: .
+    ports:
+      - 5000:8080

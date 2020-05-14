@@ -13,10 +13,6 @@ on:
   # Run tests for any PRs.
   pull_request:
 
-env:
-  # TODO: Change variable to your image's name.
-  IMAGE_NAME: image
-
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
@@ -25,60 +21,43 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Log into registry
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.DOCKER_TOKEN }}"
+
+      - name: Build and Push base if necessary
+        run: |
+          git diff --name-only HEAD^ | grep "backend/poetry.lock\|base/Dockerfile"
+          docker-compose --file docker-compose-ci.yml build base
+          docker tag apollo-base votifica/apollo-base:latest
+          docker push votifica/apollo-base:latest
+        continue-on-error: true
 
       - name: Build images
         run: |
-          docker-compose --file docker-compose-ci.yml build base
-          docker-compose --file docker-compose-ci.yml build
+          docker-compose --file docker-compose-ci.yml build app web
 
       - name: Run black on backend
         run: |
           docker-compose --file docker-compose-ci.yml run --rm app black --check .
-          
+
       - name: MyPy static analysis
         run: |
           docker-compose --file docker-compose-ci.yml run --rm app mypy apollo
-        
+
       - name: Run backend tests
         run: |
           docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
 
-#   # Push image to GitHub Packages.
-#   # See also https://docs.docker.com/docker-hub/builds/
-#   push:
-#     # Ensure test job passes before pushing image.
-#     needs: test
+      - name: Tag & Push images
+        if: github.event_name == 'push'
+        run: |
+          docker tag apollo_app votifica/apollo-app:latest
+          docker tag apollo_web votifica/apollo-web:latest
 
-#     runs-on: ubuntu-latest
-#     if: github.event_name == 'push'
-
-#     steps:
-#       - uses: actions/checkout@v2
-
-#       - name: Build image
-#         run: docker build . --file Dockerfile --tag image
-
-#       - name: Log into registry
-#         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-#       - name: Push image
-#         run: |
-#           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-          
-#           # Change all uppercase to lowercase
-#           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-#           # Strip git ref prefix from version
-#           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-#           # Strip "v" prefix from tag name
-#           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-#           # Use Docker `latest` tag convention
-#           [ "$VERSION" == "master" ] && VERSION=latest
-
-#           echo IMAGE_ID=$IMAGE_ID
-#           echo VERSION=$VERSION
-
-#           docker tag image $IMAGE_ID:$VERSION
-#           docker push $IMAGE_ID:$VERSION
+          docker push votifica/apollo-app:latest
+          docker push votifica/apollo-web:latest

@@ -1,0 +1,42 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: simpleingressroute
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`localhost`) && PathPrefix(`/api`)
+    kind: Rule
+    services:
+      - name: apollo
+        port: 8000
+  - match: Host(`localhost`)
+    kind: Rule
+    services:
+    - name: apollo-web
+      port: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroutetls
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`votifica.com`) && PathPrefix(`/api`)
+    kind: Rule
+    services:
+      - name: apollo
+        port: 8000
+  - match: Host(`votifica.com`)
+    kind: Rule
+    services:
+    - name: apollo-web
+      port: 8080
+  tls:
+    certResolver: myresolver

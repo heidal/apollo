@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      name: web
+      port: 80
+      targetPort: 80
+    - protocol: TCP
+      name: admin
+      port: 8080
+      targetPort: 8080
+    - protocol: TCP
+      name: websecure
+      port: 443
+      targetPort: 443
+  selector:
+    app: traefik
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apollo
+
+spec:
+  ports:
+    - protocol: TCP
+      name: web
+      port: 8000
+  selector:
+    app: apollo
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apollo-web
+
+spec:
+  ports:
+    - protocol: TCP
+      name: web
+      port: 8080
+  selector:
+    app: apollo-web
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+
+spec:
+  ports:
+    - protocol: TCP
+      name: db
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: db
