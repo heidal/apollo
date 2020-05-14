@@ -5,8 +5,15 @@ services:
     image: postgres:12.1
     env_file:
       - .envs/.local/.postgres
-    ports:
-      - 5432:5432
+
+  base:
+    build:
+      dockerfile: docker/local/base/Dockerfile
+      context: .
+    image: apollo-base
+    env_file:
+      - .envs/.local/.django
+      - .envs/.local/.postgres
 
   app:
     build:
@@ -22,11 +29,12 @@ services:
       - db
     volumes:
       - ./backend:/app
+      - ./apollo-crypto/apollo-crypto-python:/apollo-crypto-python
+      - ./apollo-crypto/apollo-crypto-core:/apollo-crypto-core
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/api`)"
       - "traefik.http.routers.app.entrypoints=app"
-      # - "traefik.http.routers.app.priority=42"
     restart: on-failure
 
   web:
@@ -37,6 +45,7 @@ services:
       - app 
     volumes:
       - ./frontend:/app
+      - ./apollo-crypto:/apollo-crypto
     ports:
       - 5000:8080
     labels:

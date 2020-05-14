@@ -8,6 +8,12 @@ services:
     ports:
       - 5432:5432
 
+  base:
+    build:
+      dockerfile: docker/local/base/Dockerfile
+      context: .
+    image: apollo-base
+
   app:
     build:
       dockerfile: docker/local/backend/Dockerfile

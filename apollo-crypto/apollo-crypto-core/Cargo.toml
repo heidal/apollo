@@ -1,0 +1,10 @@
+[package]
+name = "apollo-crypto-core"
+version = "0.1.0"
+authors = ["Adam Budziak <adambudziak@protonmail.com>"]
+edition = "2018"
+
+[dependencies]
+curve25519-dalek = "2"
+base64 = "0.12"
+rand = "0.7.3"
