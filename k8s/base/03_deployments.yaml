@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: default
+  name: traefik-ingress-controller
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: traefik
+  labels:
+    app: traefik
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      containers:
+        - name: traefik
+          image: traefik:v2.2
+          args:
+            - --log.level=DEBUG
+            - --api.insecure
+            - --accesslog
+            - --entrypoints.web.Address=:80
+            - --entrypoints.websecure.Address=:443
+            - --providers.kubernetescrd
+            - --certificatesresolvers.myresolver.acme.tlschallenge
+            - --certificatesresolvers.myresolver.acme.email=adam.budziak@votifica.com
+            - --certificatesresolvers.myresolver.acme.storage=acme.json
+          ports:
+            - name: web
+              containerPort: 80
+            - name: websecure
+              containerPort: 443
+            - name: admin
+              containerPort: 8080
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: apollo
+  labels:
+    app: apollo
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apollo
+  template:
+    metadata:
+      labels:
+        app: apollo
+    spec:
+      containers:
+        - name: app
+          image: votifica/apollo-app:latest
+          imagePullPolicy: Always
+          ports:
+            - name: web
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: apollo-env-file
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: apollo-secrets
+                  key: POSTGRES_PASSWORD
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: apollo-web
+  labels:
+    app: apollo-web
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apollo-web
+  template:
+    metadata:
+      labels:
+        app: apollo-web
+    spec:
+      containers:
+        - name: app
+          image: votifica/apollo-web:latest
+          imagePullPolicy: Always
+          ports:
+            - name: web
+              containerPort: 8080
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: db
+  labels:
+    app: db
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: postgres:12
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: apollo-env-file
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: apollo-secrets
+                  key: POSTGRES_PASSWORD
