@@ -23,65 +23,32 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-#      - name: Build images
-#        run: |
-#          docker-compose --file docker-compose-ci.yml build base
-#          docker-compose --file docker-compose-ci.yml build
-#
-#      - name: Run black on backend
-#        run: |
-#          docker-compose --file docker-compose-ci.yml run --rm app black --check .
-#
-#      - name: MyPy static analysis
-#        run: |
-#          docker-compose --file docker-compose-ci.yml run --rm app mypy apollo
-#
-#      - name: Run backend tests
-#        run: |
-#          docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
+      - name: Build images
+        run: |
+          docker-compose --file docker-compose-ci.yml build base app web
 
+      - name: Run black on backend
+        run: |
+          docker-compose --file docker-compose-ci.yml run --rm app black --check .
 
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
-  push:
-     # Ensure test job passes before pushing image.
-     needs: test
-     name: Push ${{ matrix.image_name }} to GitHub Packages
-     strategy:
-       matrix:
-         image_name: ['apollo-base', 'apollo_app', 'apollo_web']
+      - name: MyPy static analysis
+        run: |
+          docker-compose --file docker-compose-ci.yml run --rm app mypy apollo
 
-     runs-on: ubuntu-latest
-     if: github.event_name == 'push'
+      - name: Run backend tests
+        run: |
+          docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
 
-     steps:
-       - uses: actions/checkout@v2
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
-       - name: Log into registry
-         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+      - name: Tag & Push images
+        if: github.event_name == 'push'
+        run: |
+          docker tag apollo-base docker.pkg.github.com/${{ github.repository }}/base:latest
+          docker tag apollo_app docker.pkg.github.com/${{ github.repository }}/app:latest
+          docker tag apollo_web docker.pkg.github.com/${{ github.repository }}/web:latest
 
-       - name: Build images
-         run: |
-           docker-compose --file docker-compose-ci.yml build base app web
-
-       - name: Push image
-         run: |
-           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/${{ matrix.image_name }}
-          
-           # Change all uppercase to lowercase
-           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-           # Strip git ref prefix from version
-           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-           # Strip "v" prefix from tag name
-           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-           # Use Docker `latest` tag convention
-           [ "$VERSION" == "master" ] && VERSION=latest
-
-           echo IMAGE_ID=$IMAGE_ID
-           echo VERSION=$VERSION
-
-           docker tag ${{ matrix.image_name }} $IMAGE_ID:$VERSION
-           docker push $IMAGE_ID:$VERSION
+          docker push docker.pkg.github.com/${{ github.repository }}/base:latest
+          docker push docker.pkg.github.com/${{ github.repository }}/app:latest
+          docker push docker.pkg.github.com/${{ github.repository }}/web:latest
