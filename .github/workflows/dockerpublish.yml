@@ -40,15 +40,17 @@ jobs:
           docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
 
       - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.DOCKER_TOKEN }}"
 
       - name: Tag & Push images
         if: github.event_name == 'push'
         run: |
-          docker tag apollo-base docker.pkg.github.com/${{ github.repository }}/base:latest
-          docker tag apollo_app docker.pkg.github.com/${{ github.repository }}/app:latest
-          docker tag apollo_web docker.pkg.github.com/${{ github.repository }}/web:latest
+          docker tag apollo-base votifica/${{ github.repository }}/base:latest
+          docker tag apollo_app votifica/${{ github.repository }}/app:latest
+          docker tag apollo_web votifica/${{ github.repository }}/web:latest
 
-          docker push docker.pkg.github.com/${{ github.repository }}/base:latest
-          docker push docker.pkg.github.com/${{ github.repository }}/app:latest
-          docker push docker.pkg.github.com/${{ github.repository }}/web:latest
+          docker push votifica/${{ github.repository }}/base:latest
+          docker push votifica/${{ github.repository }}/app:latest
+          docker push votifica/${{ github.repository }}/web:latest
