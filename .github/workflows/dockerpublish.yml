@@ -23,22 +23,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build images
-        run: |
-          docker-compose --file docker-compose-ci.yml build base
-          docker-compose --file docker-compose-ci.yml build
-
-      - name: Run black on backend
-        run: |
-          docker-compose --file docker-compose-ci.yml run --rm app black --check .
-          
-      - name: MyPy static analysis
-        run: |
-          docker-compose --file docker-compose-ci.yml run --rm app mypy apollo
-        
-      - name: Run backend tests
-        run: |
-          docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
+#      - name: Build images
+#        run: |
+#          docker-compose --file docker-compose-ci.yml build base
+#          docker-compose --file docker-compose-ci.yml build
+#
+#      - name: Run black on backend
+#        run: |
+#          docker-compose --file docker-compose-ci.yml run --rm app black --check .
+#
+#      - name: MyPy static analysis
+#        run: |
+#          docker-compose --file docker-compose-ci.yml run --rm app mypy apollo
+#
+#      - name: Run backend tests
+#        run: |
+#          docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
 
 
   # Push image to GitHub Packages.
@@ -56,9 +56,11 @@ jobs:
 
      steps:
        - uses: actions/checkout@v2
-#
-#       - name: Build image
-#         run: docker build . --file Dockerfile --tag image
+
+       - name: Build images
+         run: |
+           docker-compose --file docker-compose-ci.yml build base
+           docker-compose --file docker-compose-ci.yml build
 
        - name: Log into registry
          run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
