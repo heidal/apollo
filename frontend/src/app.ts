@@ -43,7 +43,7 @@ const store = new Vuex.Store({
       return true;
     }
   }
-})
+});
 
 new Vue({
   router,
