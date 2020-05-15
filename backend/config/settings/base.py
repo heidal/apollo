@@ -30,7 +30,7 @@ SECRET_KEY = "beoyxw()b6peq#$@x10tv&#-m5e8$r(l-&t$gue^t8!q%4kpun"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS: List[str] = []
+ALLOWED_HOSTS: List[str] = [".votifica.com"]
 
 
 # Application definition

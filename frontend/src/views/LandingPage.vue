@@ -35,7 +35,6 @@
 <script>
 // @ is an alias to /src
 import ElectionsList from "@/components/ElectionsList.vue";
-import { ElGamal, KeyGenerator, Test } from "apollo_crypto";
 
 export default {
   name: "Home",
@@ -47,14 +46,5 @@ export default {
       this.$router.push("/create-election");
     }
   },
-  mounted() {
-    const keyGenerator = KeyGenerator.new();
-    const elGamal = ElGamal.new();
-    const keyPair = keyGenerator.generate();
-    const test = Test.new();
-    console.log(test.field2);
-    console.log(keyPair.secret_key());
-    console.log(keyPair.public_key());
-  }
 };
 </script>

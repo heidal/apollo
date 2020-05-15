@@ -26,17 +26,17 @@ metadata:
   namespace: default
 spec:
   entryPoints:
-    - websecure
+    - web
   routes:
-  - match: Host(`votifica.com`) && PathPrefix(`/api`)
+  - match: Host(`dev.votifica.com`) && PathPrefix(`/api`)
     kind: Rule
     services:
       - name: apollo
         port: 8000
-  - match: Host(`votifica.com`)
+  - match: Host(`dev.votifica.com`)
     kind: Rule
     services:
     - name: apollo-web
       port: 8080
-  tls:
-    certResolver: myresolver
+#  tls:
+#    certResolver: myresolver
