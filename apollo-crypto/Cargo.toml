@@ -1,7 +1,0 @@
-[workspace]
-
-members = [
-    "apollo-crypto-core",
-    "apollo-crypto-wasm",
-    "apollo-crypto-python",
-]
