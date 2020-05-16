@@ -43,6 +43,7 @@ class ElectionSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
     is_owned = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Election
@@ -55,6 +56,7 @@ class ElectionSerializer(serializers.ModelSerializer):
             "is_owned",
             "state",
             "public_key",
+            "created_at",
         ]
 
     def get_is_owned(self, election: Election) -> bool:

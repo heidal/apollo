@@ -1,101 +1,4 @@
 <style lang="scss" scoped>
-button {
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  width: 100%;
-  padding: 3%;
-  background: #43d1af;
-  border-bottom: 2px solid #30c29e;
-  border-top-style: none;
-  border-right-style: none;
-  border-left-style: none;
-  color: #fff;
-  border-radius: 1em;
-}
-button:hover {
-  background: #2ebc99;
-  cursor: pointer;
-}
-
-.election-form {
-  font: 95% Arial, Helvetica, sans-serif;
-  max-width: 600px;
-  margin: 10px auto;
-  padding: 16px;
-  background: #f7f7f7;
-
-  h1 {
-    padding: 20px 0;
-    font-size: 140%;
-    font-weight: 300;
-    text-align: left;
-    width: 100%;
-  }
-
-  p {
-    text-align: left;
-    width: 100%;
-    font-weight: 200;
-    padding-left: 2em;
-  }
-
-  input[type="text"],
-  textarea {
-    -webkit-transition: all 0.3s ease-in-out;
-    -moz-transition: all 0.3s ease-in-out;
-    -ms-transition: all 0.3s ease-in-out;
-    -o-transition: all 0.3s ease-in-out;
-    outline: none;
-    box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    width: 100%;
-    background: #fff;
-    margin-bottom: 4%;
-    border: 1px solid #ccc;
-    padding: 3%;
-    color: #555;
-    font: 95% Arial, Helvetica, sans-serif;
-
-    border-radius: 10px;
-  }
-
-  input[type="text"]:focus,
-  textarea:focus {
-    box-shadow: 0 0 5px #43d1af;
-    padding: 3%;
-    border: 1px solid #43d1af;
-  }
-
-  .add-answer-wrapper {
-    height: 2em;
-    display: flex;
-    width: 50%;
-    float: right;
-
-    p {
-      font-size: 1em;
-      margin-right: 1em;
-      display: flex;
-      justify-content: right;
-      align-items: center;
-    }
-
-    .add-answer-button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 1em;
-      height: 1em;
-      font-size: 200%;
-    }
-  }
-
-  .add-question-button {
-    margin-top: 10em;
-  }
-}
 
 .questions-submit {
   position: -webkit-sticky; /* Safari */
@@ -110,6 +13,13 @@ button:hover {
   visibility: visible;
 }
 
+.election-form {
+  max-width: 40em;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5em;
+}
+
 .hidden {
   visibility: hidden;
   opacity: 0;
@@ -117,50 +27,107 @@ button:hover {
 </style>
 <template>
   <div>
-    <div class="election-form" v-if="isCreatingElection()">
-      <form @submit.prevent="createElection()">
-        <input type="text" placeholder="Type the title of the election" v-model="election.title" />
-        <textarea type="text" placeholder="Add a description" v-model="election.description" />
-        <button type="submit" class="submit">Submit</button>
-      </form>
-    </div>
+    <b-card class="election-form" header-tag="nav"
+      title="Create election"
+    >
+      <template v-slot:header>
+        <b-nav card-header tabs>
+          <b-nav-item :active="isCreatingElection()" @click="goToGeneralInfo">General info</b-nav-item>
+          <b-nav-item disabled :active="isAddingQuestions()" @click="goToQuestions">Questions</b-nav-item>
+        </b-nav>
+      </template>
+      <b-card-body>
+        <b-form @submit.prevent="goToQuestions()" v-if="isCreatingElection()">
+          <b-form-group>
+            <b-form-input
+              v-model="election.title"
+              required
+              placeholder="Type the title of the election"
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group>
+            <b-form-textarea
+              v-model="election.description"
+              required
+              placeholder="Add a description"
+            >
+            </b-form-textarea>
+          </b-form-group>
+          <b-button type="submit" variant="primary" style="float: right">Go to questions</b-button>
+        </b-form>
 
-    <form @submit.prevent="submitQuestions()" v-else-if="isAddingQuestions()">
-      <div class="election-form">
-        <div class="question-form" v-for="(e, i) in election.questions.length" :key="i">
-          <h1>Question #{{ i + 1 }}</h1>
-          <input
-            type="text"
-            placeholder="Type the question"
-            v-model="election.questions[i].question"
-          />
-          <div v-for="(ae, ai) in election.questions[i].answers.length" :key="ai">
-            <p>Answer #{{ i + 1 }}.{{ ai + 1 }}</p>
-            <input
-              class="answer-text"
-              type="text"
-              placeholder="Type the answer"
-              v-model="election.questions[i].answers[ai].text"
-            />
-            <div class="add-answer-wrapper" v-if="ai === election.questions[i].answers.length - 1">
-              <p>Add another answer</p>
-              <button v-on:click="addAnotherAnswer(i)" class="add-answer-button">+</button>
-            </div>
-          </div>
+        <b-form @submit.prevent="createElection()" v-else-if="isAddingQuestions()">
+            <b-form-group v-for="(e, i) in election.questions.length" :key="i"
+              :label="`Question #${i+1}`"
+            >
+              <div style="display: flex">
+                <b-button @click="() => toggleCollapse(i)" variant="outline">
+                  <b-icon-chevron-down v-if="election.questions[i].visible"></b-icon-chevron-down>
+                  <b-icon-chevron-right v-else></b-icon-chevron-right>
+                </b-button>
+                <b-button
+                        size="sm"
+                        :variant="election.questions.length <= 1 ? 'outline-dark' : 'danger'"
+                        v-on:click="() => deleteQuestion(i)"
+                        :disabled="election.questions.length <= 1"
+                ><b-icon-trash></b-icon-trash></b-button>
+                <b-form-input
+                  required
+                  type="text"
+                  placeholder="Type the question"
+                  v-model="election.questions[i].question"
+                ></b-form-input>
+              </div>
+              <b-collapse v-model="election.questions[i].visible" :id="`collapse-${i}`">
+                <b-form-group
+                      v-for="(ae, ai) in election.questions[i].answers.length"
+                      :key="ai"
+                      :label="`Answer #${i + 1}.${ai + 1}`"
+                      :label-for="`answer-${i+1}-${ai+1}`"
+                      style="margin-top: 2em; margin-left: 3em"
+                >
+                  <div style="display: flex">
+                    <b-button
+                            size="sm"
+                            :variant="election.questions[i].answers.length <= 1 ? 'outline-dark' : 'danger'"
+                            v-on:click="() => deleteAnswer(i, ai)"
+                            :disabled="election.questions[i].answers.length <= 1"
+                    ><b-icon-trash></b-icon-trash></b-button>
+                    <b-form-input
+                      type="text"
+                      required
+                      placeholder="Type the answer"
+                      v-model="election.questions[i].answers[ai].text"
+                      :id="`answer-${i+1}-${ai+1}`"
+                    ></b-form-input>
+                  </div>
+                  <div class="add-answer-wrapper" v-if="ai === election.questions[i].answers.length - 1">
 
-          <button
-            class="add-question-button"
-            v-if="i === election.questions.length - 1"
-            v-on:click="addAnotherQuestion()"
-          >Add another question</button>
-        </div>
-      </div>
-      <button
-        type="submit"
-        class="questions-submit"
-        v-bind:class="questionsSubmitButton()"
-      >Submit the questions!</button>
-    </form>
+                    <b-button v-on:click="addAnotherAnswer(i)"
+                              variant="outline-primary"
+                              size="sm"
+                              style="float: right"
+                    ><span class="glyphicon glyphicon-plus"><b-icon-plus></b-icon-plus>Add another answer</span></b-button>
+                  </div>
+                </b-form-group>
+              </b-collapse>
+              <b-button
+                      style="margin-top: 2em"
+                      variant="primary"
+                      v-if="i === election.questions.length - 1"
+                      v-on:click="addAnotherQuestion()"
+              >Add another question</b-button>
+            </b-form-group>
+          <b-button
+                  type="submit"
+                  class="questions-submit"
+                  variant="primary"
+                  size="lg"
+                  v-bind:class="questionsSubmitButton()"
+          >Create election!</b-button>
+        </b-form>
+      </b-card-body>
+    </b-card>
   </div>
 </template>
 <script lang="ts">
@@ -179,6 +146,7 @@ interface Question {
   id: number | null;
   question: string | null;
   answers: Array<Answer>;
+  visible: boolean
 }
 
 export default Vue.extend({
@@ -192,7 +160,8 @@ export default Vue.extend({
           {
             id: null,
             question: null,
-            answers: [{ text: null }]
+            answers: [{ text: null }],
+            visible: true,
           }
         ] as Array<Question>
       },
@@ -203,33 +172,52 @@ export default Vue.extend({
     this.$store.getters.isAuthenticated;
   },
   methods: {
-    createElection: function() {
+    createElection() {
       this.$http
         .post("/api/elections/elections/", this.election)
         .then(response => {
           this.election.id = response.data.id;
-          this.flow = Flow.Questions;
+          this.submitQuestions()
         }, console.error);
     },
-    isCreatingElection: function(): boolean {
+    isCreatingElection(): boolean {
       return this.flow === Flow.Election;
     },
-    isAddingQuestions: function(): boolean {
+    isAddingQuestions(): boolean {
       return this.flow === Flow.Questions;
     },
-    addAnotherQuestion: function() {
+    addAnotherQuestion() {
       this.election.questions.push({
         id: null,
         question: null,
-        answers: [{ text: null }]
+        answers: [{ text: null }],
+        visible: true,
       });
     },
-    addAnotherAnswer: function(questionId: number) {
+    deleteQuestion(questionId: number) {
+      if (this.election.questions.length <= 1) {
+        return;
+      } else {
+        this.election.questions.splice(questionId, 1);
+      }
+    },
+    deleteAnswer(questionId: number, answerId: number) {
+      const answers = this.election.questions[questionId].answers;
+      if (answers.length <= 1) {
+        return;
+      } else {
+        answers.splice(answerId, 1);
+      }
+    },
+    toggleCollapse(questionId: number) {
+      this.election.questions[questionId].visible = !this.election.questions[questionId].visible;
+    },
+    addAnotherAnswer(questionId: number) {
       this.election.questions[questionId].answers.push({
         text: null
       });
     },
-    submitQuestions: function() {
+    submitQuestions() {
       const questionResponses = this.election.questions.map(question =>
         this.$http.post("/api/elections/questions/", {
           question: question.question,
@@ -249,17 +237,25 @@ export default Vue.extend({
           );
 
         Promise.all(answerResponses).then(() => {
-          this.$router.push("/");
+          this.$router.push(`/election-detail/${this.election.id}`);
         }, console.error);
       });
     },
-    questionsSubmitButton: function() {
+    questionsSubmitButton() {
       return {
         hidden:
+          this.election.questions.length === 0 ||
           this.election.questions[0].question === null ||
           this.election.questions[0].question.length === 0
       };
+    },
+    goToQuestions() {
+      this.flow = Flow.Questions;
+    },
+    goToGeneralInfo() {
+      this.flow = Flow.Election;
     }
   }
+
 });
 </script>

@@ -5,9 +5,11 @@ import VueCookies from "vue-cookies";
 import App from "./App.vue";
 import router from "./router";
 import VueAxios from 'vue-axios'
+import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import axios from 'axios';
 
 import { makeServer } from "./server";
+
 
 Vue.config.productionTip = false;
 
@@ -18,6 +20,10 @@ if (process.env.NODE_ENV === "development") {
 Vue.use(VueCookies);
 Vue.use(VueAxios, axios);
 Vue.use(Vuex);
+Vue.use(BootstrapVue);
+Vue.use(IconsPlugin);
+
+import "./custom.scss";
 
 
 const store = new Vuex.Store({
@@ -25,8 +31,12 @@ const store = new Vuex.Store({
     sessionKey: null as string | null
   },
   mutations: {
-    setSessionKey(state, sessionKey: string) {
-      Vue.$cookies.set("sessionKey", sessionKey);
+    setSessionKey(state, sessionKey: string | null) {
+      if (sessionKey === null) {
+        Vue.$cookies.remove("sessionKey");
+      } else {
+        Vue.$cookies.set("sessionKey", sessionKey);
+      }
       state.sessionKey = sessionKey;
     }
   },
@@ -34,7 +44,7 @@ const store = new Vuex.Store({
     isAuthenticated: state => {
       if (state.sessionKey === null) {
         const sessionKey = Vue.$cookies.get("sessionKey");
-        if (sessionKey === null) {
+        if (sessionKey == null) {
           return false;
         }
         state.sessionKey = sessionKey;
