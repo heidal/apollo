@@ -89,7 +89,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { APIElection} from "@/api/elections";
+import { APIElection } from "@/api/elections";
 
 interface ElectionPreview {
   id: number;
@@ -100,7 +100,6 @@ interface ElectionPreview {
   status: string;
   publicKey: string;
 }
-
 
 // TODO separate the view from the logic
 export default Vue.extend({

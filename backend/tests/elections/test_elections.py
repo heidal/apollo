@@ -114,11 +114,11 @@ def test_author_can_get_election_summary(frozen_election: Election) -> None:
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_simple_user_cannot_get_election_summary(
+def test_simple_user_can_get_election_summary(
     frozen_election: Election, other_user: User
 ) -> None:
     response = _get_election_summary(frozen_election, other_user)
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.status_code == status.HTTP_200_OK
 
 
 @mark.parametrize(

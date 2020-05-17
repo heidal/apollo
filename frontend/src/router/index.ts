@@ -1,5 +1,5 @@
 import Vue from "vue";
-import VueRouter from "vue-router";
+import VueRouter, { Route } from "vue-router";
 import Login from "@/views/Login.vue";
 import Logout from "@/views/Logout.vue";
 import Signup from "@/views/Signup.vue";
@@ -10,7 +10,15 @@ import ElectionDetailPage from "@/views/ElectionDetailPage.vue";
 import ElectionResults from "@/views/ElectionResults.vue";
 import VotePage from "@/views/VotePage.vue";
 
+import store from "@/store";
+
 Vue.use(VueRouter);
+
+const authenticatedRouteGuard = (to: Route, from: Route, next) => {
+  if (!store.getters.isAuthenticated)
+    next({ name: "Login", query: { next: to.path } });
+  else next();
+};
 
 const routes = [
   {
@@ -52,11 +60,13 @@ const routes = [
     path: "/create-election",
     name: "Create Election",
     component: ElectionCreationPage,
+    beforeEnter: authenticatedRouteGuard,
   },
   {
     path: "/vote/:electionId",
     name: "Vote in Election",
     component: VotePage,
+    beforeEnter: authenticatedRouteGuard,
   },
 ];
 

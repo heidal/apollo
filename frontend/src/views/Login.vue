@@ -15,12 +15,17 @@
   <div class="login-form-wrapper">
     <b-card class="mb-2 login-form" title="Login">
       <b-form @submit.prevent="loginWithPassword">
-        <b-form-group id="input-group-1" label="Username" label-for="input-1">
+        <b-form-group
+          id="input-group-1"
+          label="Email"
+          label-for="input-1"
+          type="email"
+        >
           <b-form-input
             id="input-1"
-            v-model="user.username"
+            v-model="user.email"
             required
-            placeholder="Enter username"
+            placeholder="Enter email"
           ></b-form-input>
         </b-form-group>
 
@@ -53,8 +58,8 @@ export default Vue.extend({
   data() {
     return {
       user: {
-        username: null,
         password: null,
+        email: null,
       },
       errors: {
         nonFieldErrors: [],
@@ -66,7 +71,7 @@ export default Vue.extend({
       this.$http.post("/api/rest-auth/login/", this.user).then(
         (response) => {
           this.$store.commit("setSessionKey", response.data.key);
-          this.$router.push("/");
+          this.$router.push(this.$route.query.next ?? "/");
         },
         (error) => {
           this.errors.nonFieldErrors =
