@@ -28,17 +28,57 @@
     text-align: right;
   }
 }
+
+.elections-list {
+  max-width: 60rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5rem;
+}
 </style>
 
 <template>
-  <div class="election-container">
-    <div class="election-entry" v-for="election in getElections()" :key="election.id">
-      <span class="election-title">
-        <h1><router-link :to="'/election-detail/' + election.id">{{ election.title }}</router-link></h1>
-        <p class="description">{{ election.description }}</p>
-      </span>
-      <p class="questions-count">{{ election.questionsCount }} questions to answer</p>
-    </div>
+  <div class="overflow-auto elections-list">
+    <b-pagination
+      v-if="showPagination"
+      v-model="currentPage"
+      :total-rows="rows"
+      :per-page="pageSize"
+      aria-controls="elections-list"
+    ></b-pagination>
+    <b-list-group
+      id="elections-list"
+    >
+      <b-list-group-item
+        v-for="election in getElections()"
+        :key="election.id"
+        :to="`/election-detail/${election.id}`"
+        class="flex-column align-items-start"
+      >
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ election.title }}</h5>
+          <small>{{ election.daysAgo }}</small>
+        </div>
+
+        <p class="mb-1">
+          {{ election.description }}
+        </p>
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <div class="d-flex w-100 align-items-center">
+            <b-badge :variant="getVariant(election)" pill>{{ election.status }}</b-badge>
+            <b-badge variant="primary" pill>{{ election.questionsCount }} question{{ election.questionsCount !== 1 ? 's': ''}}</b-badge>
+          </div>
+          <small v-if="election.publicKey && verbose">{{ election.publicKey }}</small>
+        </div>
+      </b-list-group-item>
+    </b-list-group>
+    <b-pagination
+      v-if="showPagination"
+      v-model="currentPage"
+      :total-rows="rows"
+      :per-page="pageSize"
+      aria-controls="elections-list"
+    ></b-pagination>
   </div>
 </template>
 <script lang="ts">
@@ -49,6 +89,9 @@ interface ElectionPreview {
   title: string;
   description: string;
   questionsCount: number;
+  daysAgo: string;
+  status: string;
+  publicKey: string;
 }
 
 interface APIElection {
@@ -56,6 +99,9 @@ interface APIElection {
   title: string;
   description: string;
   questions: Array<any>;
+  created_at: string;
+  public_key: string;
+  state: "CREATED" | "OPENED" | "CLOSED";
 }
 
 // TODO separate the view from the logic
@@ -67,30 +113,56 @@ export default Vue.extend({
       validator: function(value) {
         return value >= 0;
       }
+    },
+    showPagination: {
+      type: Boolean,
+      default: true
+    },
+    verbose: {
+      type: Boolean,
+      default: true
     }
   },
   data: function() {
     return {
-      elections: [] as Array<ElectionPreview>
+      elections: [] as Array<ElectionPreview>,
+      currentPage: 1,
     };
   },
   created: function() {
     this.$http.get("/api/elections/elections/").then(response => {
       this.elections = response.data.results.map(
         (election: APIElection): ElectionPreview => {
+          const daysAgo = Math.floor((new Date() - Date.parse(election.created_at)) / (1000*60*60*24));
           return {
             id: election.id,
             title: election.title,
             description: election.description,
-            questionsCount: election.questions.length
+            questionsCount: election.questions.length,
+            daysAgo: daysAgo > 0 ? `${daysAgo} days ago` : 'today',
+            status: election.state,
+            publicKey: election.public_key,
           };
         }
       );
     }, console.error);
   },
   methods: {
-    getElections: function() {
-      return this.elections.slice(0, this.pageSize);
+    getElections() {
+      return this.elections.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+    },
+    getVariant(election: ElectionPreview) {
+        const variants = {
+            CREATED: "info",
+            OPENED: "warning",
+            CLOSED: "info"
+        };
+        return variants[election.status];
+    }
+  },
+  computed: {
+    rows() {
+      return this.elections.length;
     }
   }
 });

@@ -1,54 +1,64 @@
-<style lang="scss" scoped>
-    table {
-        margin: 0 auto;
-        border-collapse: collapse;
-    }
+<style scoped lang="scss">
 
-    td, th {
-        text-align: left;
-        padding: 8px;
-        border-bottom: 1px solid #dddddd;
-    }
+.election-results {
+  max-width: 30rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5rem;
+}
 
-    tr:hover {
-        background-color: #41b883;
-    }
 </style>
 <template>
-    <div v-if="election !== null">
-        <h1>{{ election.title }}</h1>
+  <b-card
+    class="election-results"
+    :title="election.title"
+    v-if="election"
+  >
+    <b-card-body>
+      <b-card-text>
         <p>{{ election.description }}</p>
         <div v-for="(question, i) in election.questions" :key="i">
-            <p>Question #{{ i + 1 }}</p>
-            <h3>{{ question.question }}</h3>
-            <table style="margin: 0 auto">
-                <tr>
-                    <th>Answer</th>
-                    <th>Votes</th>
-                </tr>
-                <tr v-for="(answer, ai) in question.answers" :key="ai">
-                    <td>{{ answer.text }}</td>
-                    <td>{{ answer.votes }}</td>
-                </tr>
-            </table>
+          <hr class="my-4">
+          <p>Question #{{ i + 1 }}</p>
+          <h3>{{ question.question }}</h3>
+          <b-table
+            striped
+            hover
+            :items="question.answers"
+            :fields="fields"
+          ></b-table>
         </div>
-    </div>
+      </b-card-text>
+    </b-card-body>
+  </b-card>
+
 </template>
 <script lang="ts">
-    import Vue from "vue";
-    import {ApiElection, ApiElectionSummary} from "@/api/elections";
+  import Vue from "vue";
+  import {ApiElectionSummary} from "@/api/elections";
 
-    export default Vue.extend({
-        data: function() {
-            return {
-                election: null as ApiElectionSummary | null
-            };
-        },
-        created: function() {
-            const electionId = this.$router.currentRoute.params.electionId;
-            this.$http.get(`/api/elections/elections/${electionId}/summary`).then(response => {
-                this.election = response.data;
-            });
-        },
-    });
+  export default Vue.extend({
+    data: function() {
+      return {
+        election: null as ApiElectionSummary | null,
+        fields: [
+          {
+            key: "votes",
+            sortable: true,
+          },
+          {
+            key: "text",
+            label: "Answer",
+            sortable: true,
+          },
+        ]
+      };
+    },
+    created: function() {
+      const electionId = this.$router.currentRoute.params.electionId;
+      this.$http.get(`/api/elections/elections/${electionId}/summary`).then(response => {
+        this.election = response.data;
+      });
+    },
+  });
 </script>

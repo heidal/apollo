@@ -1,45 +1,75 @@
 <style scoped lang="scss">
-.login-form {
+
+.login-form-wrapper {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
-  height: 10em;
+  flex-direction: column;
+  padding-top: 5em;
 }
 
-.submit {
-  width: 10em;
+.login-form {
+  max-width: 20em;
 }
 </style>
 
 <template>
-  <div class="login">
-    <p>Login with your password</p>
-    <form @submit.prevent="loginWithPassword" class="login-form">
-      <label>
-        <input type="text" v-model="user.username" placeholder="Username" />
-      </label>
-      <label>
-        <input type="password" v-model="user.password" placeholder="Password" />
-      </label>
-      <button type="submit" class="submit">Submit</button>
-      <p>
-        Or
-        <router-link to="/signup">signup</router-link>
-      </p>
-    </form>
+  <div class="login-form-wrapper">
+    <b-card
+      class="mb-2 login-form"
+      title="Login"
+    >
+        <b-form @submit.prevent="loginWithPassword">
+        <b-form-group
+          id="input-group-1"
+          label="Username"
+          label-for="input-1"
+        >
+          <b-form-input
+            id="input-1"
+            v-model="user.username"
+            required
+            placeholder="Enter username"
+          ></b-form-input>
+        </b-form-group>
+
+        <b-form-group id="input-group-2" label="Password" label-for="input-2">
+          <b-form-input
+            id="input-2"
+            v-model="user.password"
+            type="password"
+            required
+            placeholder="Enter password"
+          ></b-form-input>
+        </b-form-group>
+        <b-form-invalid-feedback
+          id="invalid-feedback"
+          :state="noErrors"
+        >
+          {{ errors.nonFieldErrors[0] }}
+        </b-form-invalid-feedback>
+        <b-button type="submit" variant="primary">Submit</b-button>
+        <p>
+          Or
+          <router-link to="/signup">signup</router-link>
+        </p>
+      </b-form>
+    </b-card>
   </div>
+
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
 export default Vue.extend({
-  data: function() {
+  data() {
     return {
       user: {
         username: null,
         password: null
+      },
+      errors: {
+        nonFieldErrors: []
       }
     };
   },
@@ -51,7 +81,7 @@ export default Vue.extend({
           this.$router.push("/");
         },
         error => {
-          console.error(error);
+          this.errors.nonFieldErrors = error.response.data["non_field_errors"] ?? [];
         }
       );
     }
@@ -59,6 +89,9 @@ export default Vue.extend({
   computed: {
     isLogged() {
       return this.$store.state.sessionKey === null;
+    },
+    noErrors() {
+      return this.errors.nonFieldErrors.length === 0;
     }
   }
 });

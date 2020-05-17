@@ -1,23 +1,20 @@
 <style scoped lang="scss">
-.login-form {
+
+.logout-form-wrapper {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
-  height: 10em;
+  flex-direction: column;
+  padding-top: 5em;
 }
 
-.submit {
-  width: 10em;
-}
 </style>
 
 <template>
-  <div class="logout">
-    <p>Are you sure you want to logout?</p>
-    <form @submit.prevent="logout" class="logout-form">
-      <button type="submit" class="submit">Logout</button>
-    </form>
+  <div class="logout-form-wrapper">
+    <h3>Are you sure you want to logout?</h3>
+    <b-form @submit.prevent="logout">
+      <b-button type="submit" size="lg" variant="primary">Logout</b-button>
+    </b-form>
   </div>
 </template>
 

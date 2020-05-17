@@ -1,57 +1,26 @@
 <style lang="scss" scoped>
-.container {
-  display: flex;
-  justify-content: space-between;
-}
-
 .logo {
-  height: 50px;
+  max-height: 50px;
 }
 
-.logo-container:hover {
-  cursor: pointer;
-}
-
-.logo-container {
-  display: flex;
-
-  h1 {
-    margin: 0;
-  }
-}
-
-.login-link {
-  display: flex;
-  padding-right: 3em;
-  align-items: center;
-
-  a {
-    margin-left: 2em;
-  }
-}
 </style>
 
 <template>
-  <div class="container">
-    <div class="logo-container" v-on:click="goToHomePage">
+  <b-navbar toggleable="lg" type="dark" variant="dark">
+    <b-navbar-brand to="/">
       <img class="logo" src="@/assets/logo.png" />
-      <h1>Apollo</h1>
-    </div>
-    <div class="login-link">
-      <router-link to="/elections">Elections</router-link>
-      <router-link v-if="!this.$store.getters.isAuthenticated" to="/login">Login</router-link>
-      <router-link v-else to="/logout">Logout</router-link>
-    </div>
-  </div>
+      Votifica
+    </b-navbar-brand>
+    <b-navbar-nav class="ml-auto">
+      <b-nav-item to="/elections">Elections</b-nav-item>
+      <b-nav-item to="/login" v-if="!this.$store.getters.isAuthenticated">Login</b-nav-item>
+      <b-nav-item to="/logout" v-else href="/logout#">Logout</b-nav-item>
+    </b-navbar-nav>
+  </b-navbar>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 export default Vue.extend({
-  methods: {
-    goToHomePage: function() {
-      this.$router.push("/");
-    }
-  }
 });
 </script>
