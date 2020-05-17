@@ -1,5 +1,4 @@
 from typing import List
-import apollo_crypto
 
 from django_filters import rest_framework as filters
 from rest_framework import viewsets, mixins
@@ -44,9 +43,6 @@ class ElectionViewSet(viewsets.ModelViewSet):
     queryset = Election.objects.all()
 
     def get_permissions(self) -> List[BasePermission]:
-        key_generator = apollo_crypto.KeyGenerator()
-        keys = key_generator.generate()
-        print(keys.public_key(), keys.secret_key(), key_generator.test())
         permission_classes = get_default_permission_classes()
         if self.action in ("update", "partial_update", "delete"):
             permission_classes += [IsElectionAuthor & IsElectionMutable]  # type: ignore

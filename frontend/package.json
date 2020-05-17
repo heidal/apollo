@@ -15,6 +15,8 @@
     "bootstrap-vue": "^2.14.0",
     "core-js": "^3.6.4",
     "es6-promise": "^4.2.8",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1",
     "vue": "^2.6.11",
     "vue-authenticate": "https://github.com/abeven/vue-authenticate#add_ts_defs",
     "vue-class-component": "^7.2.2",
