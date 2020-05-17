@@ -3,6 +3,7 @@ from django.utils.timezone import now
 from django_fsm import FSMField, transition
 from django_utils.choices import Choices, Choice
 from nacl.public import PrivateKey
+from nacl.encoding import Base64Encoder
 
 from apollo.users.models import User
 
@@ -48,8 +49,9 @@ class Election(models.Model):
         conditions=[can_be_opened],
     )
     def open(self) -> None:
-        self.secret_key = "secret_key"
-        self.public_key = "public_key"
+        sk = PrivateKey.generate()
+        self.secret_key = sk.encode(Base64Encoder()).decode("ascii")
+        self.public_key = sk.public_key.encode(Base64Encoder()).decode("ascii")
         self.opened_at = now()
 
     @transition(field=state, source=State.OPENED, target=State.CLOSED)
