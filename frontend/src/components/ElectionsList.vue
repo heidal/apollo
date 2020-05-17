@@ -46,9 +46,7 @@
       :per-page="pageSize"
       aria-controls="elections-list"
     ></b-pagination>
-    <b-list-group
-      id="elections-list"
-    >
+    <b-list-group id="elections-list">
       <b-list-group-item
         v-for="election in getElections()"
         :key="election.id"
@@ -65,10 +63,18 @@
         </p>
         <div class="d-flex w-100 align-items-center justify-content-between">
           <div class="d-flex w-100 align-items-center">
-            <b-badge :variant="getVariant(election)" pill>{{ election.status }}</b-badge>
-            <b-badge variant="primary" pill>{{ election.questionsCount }} question{{ election.questionsCount !== 1 ? 's': ''}}</b-badge>
+            <b-badge :variant="getVariant(election)" pill>{{
+              election.status
+            }}</b-badge>
+            <b-badge variant="primary" pill
+              >{{ election.questionsCount }} question{{
+                election.questionsCount !== 1 ? "s" : ""
+              }}</b-badge
+            >
           </div>
-          <small v-if="election.publicKey && verbose">{{ election.publicKey }}</small>
+          <small v-if="election.publicKey && verbose">{{
+            election.publicKey
+          }}</small>
         </div>
       </b-list-group-item>
     </b-list-group>
@@ -83,6 +89,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
+import { APIElection} from "@/api/elections";
 
 interface ElectionPreview {
   id: number;
@@ -94,15 +101,6 @@ interface ElectionPreview {
   publicKey: string;
 }
 
-interface APIElection {
-  id: number;
-  title: string;
-  description: string;
-  questions: Array<any>;
-  created_at: string;
-  public_key: string;
-  state: "CREATED" | "OPENED" | "CLOSED";
-}
 
 // TODO separate the view from the logic
 export default Vue.extend({
@@ -110,36 +108,39 @@ export default Vue.extend({
     pageSize: {
       type: Number,
       default: 10,
-      validator: function(value) {
+      validator: function (value) {
         return value >= 0;
-      }
+      },
     },
     showPagination: {
       type: Boolean,
-      default: true
+      default: true,
     },
     verbose: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
-  data: function() {
+  data() {
     return {
       elections: [] as Array<ElectionPreview>,
       currentPage: 1,
     };
   },
-  created: function() {
-    this.$http.get("/api/elections/elections/").then(response => {
+  created() {
+    this.$http.get("/api/elections/elections/").then((response) => {
       this.elections = response.data.results.map(
         (election: APIElection): ElectionPreview => {
-          const daysAgo = Math.floor((new Date() - Date.parse(election.created_at)) / (1000*60*60*24));
+          const daysAgo = Math.floor(
+            (new Date() - Date.parse(election.created_at)) /
+              (1000 * 60 * 60 * 24)
+          );
           return {
             id: election.id,
             title: election.title,
             description: election.description,
             questionsCount: election.questions.length,
-            daysAgo: daysAgo > 0 ? `${daysAgo} days ago` : 'today',
+            daysAgo: daysAgo > 0 ? `${daysAgo} days ago` : "today",
             status: election.state,
             publicKey: election.public_key,
           };
@@ -148,22 +149,25 @@ export default Vue.extend({
     }, console.error);
   },
   methods: {
-    getElections() {
-      return this.elections.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+    getElections(): Array<ElectionPreview> {
+      return this.elections.slice(
+        (this.currentPage - 1) * this.pageSize,
+        this.currentPage * this.pageSize
+      );
     },
-    getVariant(election: ElectionPreview) {
-        const variants = {
-            CREATED: "info",
-            OPENED: "warning",
-            CLOSED: "info"
-        };
-        return variants[election.status];
-    }
+    getVariant(election: ElectionPreview): string {
+      const variants = {
+        CREATED: "info",
+        OPENED: "warning",
+        CLOSED: "info",
+      };
+      return variants[election.status];
+    },
   },
   computed: {
-    rows() {
+    rows(): number {
       return this.elections.length;
-    }
-  }
+    },
+  },
 });
 </script>

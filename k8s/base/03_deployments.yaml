@@ -34,9 +34,10 @@ spec:
             - --entrypoints.web.Address=:80
             - --entrypoints.websecure.Address=:443
             - --providers.kubernetescrd
-            - --certificatesresolvers.myresolver.acme.tlschallenge
+            - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
             - --certificatesresolvers.myresolver.acme.email=adam.budziak@votifica.com
             - --certificatesresolvers.myresolver.acme.storage=acme.json
+            - --entrypoints.web.http.redirections.entrypoint.to=websecure
           ports:
             - name: web
               containerPort: 80

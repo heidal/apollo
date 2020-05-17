@@ -1,5 +1,4 @@
 <style scoped lang="scss">
-
 .login-form-wrapper {
   display: flex;
   align-items: center;
@@ -14,16 +13,9 @@
 
 <template>
   <div class="login-form-wrapper">
-    <b-card
-      class="mb-2 login-form"
-      title="Login"
-    >
-        <b-form @submit.prevent="loginWithPassword">
-        <b-form-group
-          id="input-group-1"
-          label="Username"
-          label-for="input-1"
-        >
+    <b-card class="mb-2 login-form" title="Login">
+      <b-form @submit.prevent="loginWithPassword">
+        <b-form-group id="input-group-1" label="Username" label-for="input-1">
           <b-form-input
             id="input-1"
             v-model="user.username"
@@ -41,10 +33,7 @@
             placeholder="Enter password"
           ></b-form-input>
         </b-form-group>
-        <b-form-invalid-feedback
-          id="invalid-feedback"
-          :state="noErrors"
-        >
+        <b-form-invalid-feedback id="invalid-feedback" :state="noErrors">
           {{ errors.nonFieldErrors[0] }}
         </b-form-invalid-feedback>
         <b-button type="submit" variant="primary">Submit</b-button>
@@ -55,7 +44,6 @@
       </b-form>
     </b-card>
   </div>
-
 </template>
 
 <script lang="ts">
@@ -66,25 +54,26 @@ export default Vue.extend({
     return {
       user: {
         username: null,
-        password: null
+        password: null,
       },
       errors: {
-        nonFieldErrors: []
-      }
+        nonFieldErrors: [],
+      },
     };
   },
   methods: {
     loginWithPassword() {
       this.$http.post("/api/rest-auth/login/", this.user).then(
-        response => {
+        (response) => {
           this.$store.commit("setSessionKey", response.data.key);
           this.$router.push("/");
         },
-        error => {
-          this.errors.nonFieldErrors = error.response.data["non_field_errors"] ?? [];
+        (error) => {
+          this.errors.nonFieldErrors =
+            error.response.data["non_field_errors"] ?? [];
         }
       );
-    }
+    },
   },
   computed: {
     isLogged() {
@@ -92,7 +81,7 @@ export default Vue.extend({
     },
     noErrors() {
       return this.errors.nonFieldErrors.length === 0;
-    }
-  }
+    },
+  },
 });
 </script>

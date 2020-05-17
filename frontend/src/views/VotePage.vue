@@ -1,29 +1,35 @@
 <template>
-  <election-vote-form v-if="election" :election="election" @votesSubmitted="voteInElection"></election-vote-form>
+  <election-vote-form
+    v-if="election"
+    :election="election"
+    @votesSubmitted="voteInElection"
+  ></election-vote-form>
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { ApiElection } from '@/api/elections';
-import ElectionVoteForm, { Vote } from '@/components/ElectionVoteForm.vue';
+import { ApiElection } from "@/api/elections";
+import ElectionVoteForm, { Vote } from "@/components/ElectionVoteForm.vue";
 
 export default Vue.extend({
   components: {
-      ElectionVoteForm
+    ElectionVoteForm,
   },
-  data: function() {
+  data: function () {
     return {
       election: null as ApiElection | null,
     };
   },
-  created: function() {
+  created: function () {
     const electionId = this.$router.currentRoute.params.electionId;
-    this.$http.get(`/api/elections/elections/${electionId}/`).then(response => {
-      this.election = response.data;
-    });
+    this.$http
+      .get(`/api/elections/elections/${electionId}/`)
+      .then((response) => {
+        this.election = response.data;
+      });
   },
   methods: {
-    voteInElection: function(votes: Array<Vote>) {
-      const results = votes.map(vote => {
+    voteInElection: function (votes: Array<Vote>) {
+      const results = votes.map((vote) => {
         console.log(vote);
         if (vote.selected === null) {
           console.error("Vote is null");
@@ -37,7 +43,7 @@ export default Vue.extend({
       Promise.all(results).then(() => {
         this.$router.push("/");
       }, console.error);
-    }
-  }
+    },
+  },
 });
 </script>

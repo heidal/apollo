@@ -4,12 +4,11 @@ import Vuex from "vuex";
 import VueCookies from "vue-cookies";
 import App from "./App.vue";
 import router from "./router";
-import VueAxios from 'vue-axios'
+import VueAxios from "vue-axios";
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
-import axios from 'axios';
+import axios from "axios";
 
 import { makeServer } from "./server";
-
 
 Vue.config.productionTip = false;
 
@@ -25,10 +24,9 @@ Vue.use(IconsPlugin);
 
 import "./custom.scss";
 
-
 const store = new Vuex.Store({
   state: {
-    sessionKey: null as string | null
+    sessionKey: null as string | null,
   },
   mutations: {
     setSessionKey(state, sessionKey: string | null) {
@@ -38,10 +36,10 @@ const store = new Vuex.Store({
         Vue.$cookies.set("sessionKey", sessionKey);
       }
       state.sessionKey = sessionKey;
-    }
+    },
   },
   getters: {
-    isAuthenticated: state => {
+    isAuthenticated: (state) => {
       if (state.sessionKey === null) {
         const sessionKey = Vue.$cookies.get("sessionKey");
         if (sessionKey == null) {
@@ -51,22 +49,22 @@ const store = new Vuex.Store({
         return true;
       }
       return true;
-    }
-  }
+    },
+  },
 });
 
 new Vue({
   router,
   store,
-  render: h => h(App),
-  mounted () {
+  render: (h) => h(App),
+  mounted() {
     axios.interceptors.request.use(
-      config => {
+      (config) => {
         // TODO make sure that the CSRFToken is not included in any requests going to external services.
         config.headers["X-CSRFToken"] = this.$cookies.get("csrftoken");
         return config;
       },
-      error => Promise.reject(error)
-    )
-  }
+      (error) => Promise.reject(error)
+    );
+  },
 }).$mount("#app");

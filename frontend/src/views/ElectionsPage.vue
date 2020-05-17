@@ -8,7 +8,7 @@ import ElectionsList from "@/components/ElectionsList.vue";
 
 export default Vue.extend({
   components: {
-    ElectionsList
-  }
+    ElectionsList,
+  },
 });
 </script>

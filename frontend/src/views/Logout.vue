@@ -1,12 +1,10 @@
 <style scoped lang="scss">
-
 .logout-form-wrapper {
   display: flex;
   align-items: center;
   flex-direction: column;
   padding-top: 5em;
 }
-
 </style>
 
 <template>
@@ -29,14 +27,14 @@ export default Vue.extend({
           this.$store.commit("setSessionKey", null);
           this.$router.push("/");
         },
-        error => {
+        (error) => {
           if (error.response.status === 403) {
             this.$store.commit("setSessionKey", null);
             this.$router.push("/");
           }
         }
       );
-    }
-  }
+    },
+  },
 });
 </script>
