@@ -16,22 +16,22 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: LandingPage
+    component: LandingPage,
   },
   {
     path: "/login",
     name: "Login",
-    component: Login
+    component: Login,
   },
   {
     path: "/logout",
     name: "Logout",
-    component: Logout
+    component: Logout,
   },
   {
     path: "/signup",
     name: "Signup",
-    component: Signup
+    component: Signup,
   },
   {
     path: "/elections",
@@ -57,12 +57,12 @@ const routes = [
     path: "/vote/:electionId",
     name: "Vote in Election",
     component: VotePage,
-  }
+  },
 ];
 
 const router = new VueRouter({
   routes,
-  mode: "history"
+  mode: "history",
 });
 
 export default router;

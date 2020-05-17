@@ -9,18 +9,20 @@ import { ApiElection } from "@/api/elections";
 
 export default Vue.extend({
   components: {
-      ElectionDetail
+    ElectionDetail,
   },
-  data: function() {
+  data: function () {
     return {
-      election: null as ApiElection | null
+      election: null as ApiElection | null,
     };
   },
-  created: function() {
+  created: function () {
     const electionId = this.$router.currentRoute.params.electionId;
-    this.$http.get(`/api/elections/elections/${electionId}`).then(response => {
-      this.election = response.data;
-    });
+    this.$http
+      .get(`/api/elections/elections/${electionId}`)
+      .then((response) => {
+        this.election = response.data;
+      });
   },
 });
 </script>

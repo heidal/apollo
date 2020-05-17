@@ -26,15 +26,25 @@
         Lorem ipsum secure voting service for dolor sit amet
       </template>
 
-      <hr class="my-4">
+      <hr class="my-4" />
 
-      <b-button variant="outline-primary" size="lg" v-on:click="goToCreateElection">Create your own election!</b-button>
+      <b-button
+        variant="outline-primary"
+        size="lg"
+        v-on:click="goToCreateElection"
+        >Create your own election!</b-button
+      >
       <p>or</p>
       <b-button variant="outline-primary">Learn more</b-button>
     </b-jumbotron>
     <div class="elections-container">
       See what what other users are voting for:
-      <ElectionsList class="elections-list" :show-pagination="false" :verbose="false" v-bind:pageSize="3" />
+      <ElectionsList
+        class="elections-list"
+        :show-pagination="false"
+        :verbose="false"
+        v-bind:pageSize="3"
+      />
     </div>
   </div>
 </template>
@@ -46,12 +56,12 @@ import ElectionsList from "@/components/ElectionsList.vue";
 export default {
   name: "Home",
   components: {
-    ElectionsList
+    ElectionsList,
   },
   methods: {
-    goToCreateElection: function() {
+    goToCreateElection: function () {
       this.$router.push("/create-election");
-    }
+    },
   },
 };
 </script>

@@ -5,7 +5,10 @@ metadata:
 
 spec:
   group: traefik.containo.us
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: IngressRoute
     plural: ingressroutes
@@ -20,7 +23,10 @@ metadata:
 
 spec:
   group: traefik.containo.us
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: Middleware
     plural: middlewares
@@ -65,7 +71,10 @@ metadata:
 
 spec:
   group: traefik.containo.us
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: TLSOption
     plural: tlsoptions
@@ -80,7 +89,10 @@ metadata:
 
 spec:
   group: traefik.containo.us
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: TLSStore
     plural: tlsstores
@@ -95,7 +107,10 @@ metadata:
 
 spec:
   group: traefik.containo.us
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
   names:
     kind: TraefikService
     plural: traefikservices
@@ -104,7 +119,7 @@ spec:
 
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: traefik-ingress-controller
 
@@ -150,7 +165,7 @@ rules:
 
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: traefik-ingress-controller
 
@@ -162,3 +177,12 @@ subjects:
   - kind: ServiceAccount
     name: traefik-ingress-controller
     namespace: default
+---
+kind: Middleware
+apiVersion: traefik.containo.us/v1alpha1
+metadata:
+  name: hsts-headers
+spec:
+  headers:
+    frameDeny: true
+    sslRedirect: true
