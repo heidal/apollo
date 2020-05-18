@@ -47,7 +47,7 @@ class ElectionViewSet(viewsets.ModelViewSet):
         if self.action in ("update", "partial_update", "delete"):
             permission_classes += [IsElectionAuthor & IsElectionMutable]  # type: ignore
         elif self.action in ("summary",):
-            permission_classes += [IsElectionAuthor & IsElectionClosed]  # type: ignore
+            permission_classes += [IsElectionClosed]  # type: ignore
 
         return [perm() for perm in permission_classes]
 

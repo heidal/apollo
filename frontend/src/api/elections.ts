@@ -22,7 +22,6 @@ export interface APIElection {
   is_owned: boolean;
 }
 
-
 export interface ApiElectionSummary {
   id: number;
   title: string;

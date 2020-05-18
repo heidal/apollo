@@ -15,24 +15,6 @@
   <div class="signup-form-wrapper">
     <b-card class="signup-form mb-2" title="Signup">
       <b-form @submit.prevent="signupWithPassword">
-        <b-form-group
-          id="username-input-group"
-          label="Username"
-          label-for="input-1"
-        >
-          <b-form-input
-            id="input-1"
-            v-model="user.username"
-            required
-            placeholder="Enter username"
-          ></b-form-input>
-          <b-form-invalid-feedback
-            id="invalid-username"
-            :state="noErrors('username')"
-          >
-            {{ errors.username[0] }}
-          </b-form-invalid-feedback>
-        </b-form-group>
         <b-form-group id="email-input-group" label="Email" label-for="input-1">
           <b-form-input
             id="email-input"
@@ -99,13 +81,11 @@ export default Vue.extend({
   data() {
     return {
       user: {
-        username: null,
         password1: null,
         password2: null,
         email: null,
       },
       errors: {
-        username: [],
         password1: [],
         password2: [],
         email: [],
@@ -122,7 +102,6 @@ export default Vue.extend({
         (error) => {
           const newErrors = error.response.data;
           this.errors = {
-            username: newErrors.username ?? [],
             password1: newErrors.password1 ?? [],
             password2: newErrors.password2 ?? [],
             email: newErrors.email ?? [],
