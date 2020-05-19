@@ -115,7 +115,7 @@ class ElectionSerializer(
             "public_key",
             "created_at",
             "authorization_rules",
-            "permissions"
+            "permissions",
         ]
         read_only_fields = ["public_key"]
 
