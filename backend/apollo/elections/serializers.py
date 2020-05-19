@@ -63,7 +63,7 @@ class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
         model = VoterAuthorizationRule
         fields = ["type", "value"]
 
-    def to_representation(self, instance: Meta.model) -> Dict:
+    def to_representation(self, instance: VoterAuthorizationRule) -> Dict:
         data = super().to_representation(instance)
 
         data["type"] = instance.get_type_display()

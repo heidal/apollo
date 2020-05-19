@@ -74,7 +74,7 @@ class VoterAuthorizationRule(models.Model):
         Election, on_delete=models.CASCADE, related_name="authorization_rules"
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    type = models.IntegerField(choices=Type)
+    type = models.IntegerField(choices=Type.choices)
     value = models.CharField(max_length=100)
 
     def is_authorized(self, name: str) -> bool:
@@ -82,3 +82,4 @@ class VoterAuthorizationRule(models.Model):
             return self.value == name
         elif self.type == self.Type.REGEX:
             return regex.fullmatch(self.value, name) is not None
+        raise ValueError("VoterAuthorizationRule.Type invalid type")
