@@ -117,11 +117,10 @@ class VoteViewSet(viewsets.GenericViewSet):
         try:
             encoder = nacl.encoding.Base64Encoder()
             election_sk = nacl.public.PrivateKey(
-                election.secret_key.encode("ascii"),
-                encoder
+                election.secret_key.encode("ascii"), encoder
             )
             sealed_box = nacl.public.SealedBox(election_sk)
-            answer_id = sealed_box.decrypt(answer_id_ciphertext, encoder).decode("utf-8")
+            answer_id = sealed_box.decrypt(answer_id_ciphertext, encoder).decode()
         except nacl.exceptions.CryptoError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
