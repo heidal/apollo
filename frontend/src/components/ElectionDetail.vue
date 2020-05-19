@@ -125,9 +125,7 @@ export default Vue.extend({
   },
   computed: {
     canVoteInElection() {
-      const result = (this.election?.permissions.indexOf("CAN_VOTE") ?? -1) > -1;
-      console.log(result)
-      return result;
+      return (this.election?.permissions.indexOf("CAN_VOTE") ?? -1) > -1;
     }
   }
 });
