@@ -2,7 +2,17 @@
 
 set -e
 
-docker-compose exec app python manage.py makemigrations --check
-docker-compose exec app black --check .
-docker-compose exec app mypy apollo
-docker-compose exec app python manage.py test --settings config.settings.test
+if [[ "$PWD" = "/app" ]]; then
+
+COMPOSE=""
+
+else
+
+COMPOSE="docker-compose exec app"
+
+fi
+
+$COMPOSE python manage.py makemigrations --check
+$COMPOSE black --check .
+$COMPOSE mypy apollo
+$COMPOSE python manage.py test --settings config.settings.test

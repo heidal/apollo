@@ -2,6 +2,7 @@
   <election-vote-form
     v-if="election"
     :election="election"
+    :vote-error="voteError"
     @votesSubmitted="voteInElection"
   ></election-vote-form>
 </template>
@@ -9,6 +10,7 @@
 import Vue from "vue";
 import { ApiElection } from "@/api/elections";
 import ElectionVoteForm, { Vote } from "@/components/ElectionVoteForm.vue";
+import {AxiosError} from "axios";
 
 export default Vue.extend({
   components: {
@@ -17,6 +19,7 @@ export default Vue.extend({
   data: function () {
     return {
       election: null as ApiElection | null,
+      voteError: null as string | null,
     };
   },
   created: function () {
@@ -42,8 +45,17 @@ export default Vue.extend({
       });
       Promise.all(results).then(() => {
         this.$router.push("/");
-      }, console.error);
+      }, error => {
+        this.handleErrors(error);
+      });
     },
+    handleErrors(error: AxiosError) {
+      if (error.response?.status === 403) {
+        this.voteError = "You're not authorized to vote in this election.";
+      } else {
+        this.voteError = `Unknown error: ${error.response?.data}`
+      }
+    }
   },
 });
 </script>

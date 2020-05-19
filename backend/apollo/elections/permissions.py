@@ -83,3 +83,9 @@ class CanAddAnswer(permissions.BasePermission):
             return True
 
         return can_edit_election(request.user, question.election)
+
+
+def can_vote_in_election(user: User, election: Election) -> bool:
+    return any(
+        rule.is_authorized(user.email) for rule in election.authorization_rules.all()
+    )

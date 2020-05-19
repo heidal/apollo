@@ -1,6 +1,7 @@
 import factory.fuzzy
 
 from apollo.elections.models import Election, Question, Vote, Answer
+from apollo.elections.models.election import VoterAuthorizationRule
 from factories.users import UserFactory
 
 
@@ -13,6 +14,17 @@ class ElectionFactory(factory.django.DjangoModelFactory):
     state = factory.fuzzy.FuzzyChoice(
         choices=map(lambda x: x[0], Election.State.choices)
     )
+
+
+class VoterAuthorizationRuleFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = VoterAuthorizationRule
+
+    election = factory.SubFactory(ElectionFactory)
+    type = factory.fuzzy.FuzzyChoice(
+        choices=[t[0] for t in VoterAuthorizationRule.Type]
+    )
+    value = factory.Faker("email")
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):

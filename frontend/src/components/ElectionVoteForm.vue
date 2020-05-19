@@ -20,6 +20,7 @@
           v-for="(question, i) in election.questions"
           :key="i"
         >
+          <h3>{{ question.question }}</h3>
           <b-form-radio
             required
             v-for="(answer, ai) in question.answers"
@@ -37,6 +38,11 @@
           style="float: right;"
           >Send votes</b-button
         >
+        <b-form-invalid-feedback
+          :state="voteError === null"
+        >
+          {{ voteError }}
+        </b-form-invalid-feedback>
       </b-form>
     </b-card-body>
   </b-card>
@@ -53,6 +59,7 @@ export interface Vote {
 export default Vue.component("vote-form", {
   props: {
     election: ApiElection,
+    voteError: null as string | null,
   },
   data() {
     return {

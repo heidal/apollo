@@ -11,7 +11,7 @@ export interface ApiQuestion {
   election: number;
 }
 
-export interface APIElection {
+export interface ApiElection {
   id: number;
   title: string;
   description: string;
@@ -20,6 +20,7 @@ export interface APIElection {
   public_key: string;
   state: "CREATED" | "OPENED" | "CLOSED";
   is_owned: boolean;
+  permissions: Array<string>
 }
 
 export interface ApiElectionSummary {

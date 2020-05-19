@@ -30,9 +30,16 @@
         </template>
         <template v-else-if="election.state === 'OPENED'">
           <h4>Election is opened</h4>
-          <p>
+          <p v-if="canVoteInElection">
             <b-button v-on:click="voteInElection()"
               >Vote in this election!</b-button
+            >
+          </p>
+          <p v-else>
+            <b-button
+              disabled
+              variant="outline-dark"
+              >You're not authorized to vote in this election</b-button
             >
           </p>
           <p>
@@ -55,9 +62,15 @@
           <h4>Election is not yet opened</h4>
         </template>
         <template v-else-if="election.state === 'OPENED'">
-          <p>
+          <p v-if="canVoteInElection">
             <b-button v-on:click="voteInElection()"
-              >Vote in this election!</b-button
+              >Vote in this election!</b-button>
+          </p>
+          <p v-else>
+            <b-button
+              disabled
+              variant="outline-dark"
+              >You're not authorized to vote in this election</b-button
             >
           </p>
         </template>
@@ -108,6 +121,12 @@ export default Vue.extend({
     showElectionResults() {
       this.$router.push(`/election-detail/${this.election.id}/results`);
     },
+
   },
+  computed: {
+    canVoteInElection() {
+      return (this.election?.permissions.indexOf("CAN_VOTE") ?? -1) > -1;
+    }
+  }
 });
 </script>
