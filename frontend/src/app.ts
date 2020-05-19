@@ -7,6 +7,8 @@ import VueAxios from "vue-axios";
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import axios from "axios";
 
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+// @ts-ignore
 import { makeServer } from "./server";
 import store from "@/store";
 
@@ -26,15 +28,15 @@ import "./custom.scss";
 new Vue({
   router,
   store,
-  render: (h) => h(App),
   mounted() {
     axios.interceptors.request.use(
-      (config) => {
+      config => {
         // TODO make sure that the CSRFToken is not included in any requests going to external services.
         config.headers["X-CSRFToken"] = this.$cookies.get("csrftoken");
         return config;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error)
     );
   },
+  render: h => h(App)
 }).$mount("#app");

@@ -53,6 +53,11 @@
 
 <script lang="ts">
 import Vue from "vue";
+import {Dictionary} from "vue-router/types/router";
+
+interface Errors {
+  nonFieldErrors: Array<string>
+}
 
 export default Vue.extend({
   data() {
@@ -63,15 +68,19 @@ export default Vue.extend({
       },
       errors: {
         nonFieldErrors: [],
-      },
+      } as Errors,
     };
   },
   methods: {
     loginWithPassword() {
       this.$http.post("/api/rest-auth/login/", this.user).then(
         (response) => {
+          // the TS error below is due to some bug in vue-router
+          /* eslint-disable @typescript-eslint/ban-ts-ignore */
+          // @ts-ignore
+          const query: Dictionary<string> = this.$route.query;
           this.$store.commit("setSessionKey", response.data.key);
-          this.$router.push(this.$route.query.next ?? "/");
+          this.$router.push(query.next || "/");
         },
         (error) => {
           this.errors.nonFieldErrors =
@@ -81,10 +90,10 @@ export default Vue.extend({
     },
   },
   computed: {
-    isLogged() {
+    isLogged(): boolean {
       return this.$store.state.sessionKey === null;
     },
-    noErrors() {
+    noErrors(): boolean {
       return this.errors.nonFieldErrors.length === 0;
     },
   },

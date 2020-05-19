@@ -89,7 +89,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { APIElection } from "@/api/elections";
+import { ApiElection } from "@/api/elections";
 
 interface ElectionPreview {
   id: number;
@@ -129,9 +129,9 @@ export default Vue.extend({
   created() {
     this.$http.get("/api/elections/elections/").then((response) => {
       this.elections = response.data.results.map(
-        (election: APIElection): ElectionPreview => {
+        (election: ApiElection): ElectionPreview => {
           const daysAgo = Math.floor(
-            (new Date() - Date.parse(election.created_at)) /
+            ((new Date()).valueOf() - Date.parse(election.created_at).valueOf()) /
               (1000 * 60 * 60 * 24)
           );
           return {
@@ -145,7 +145,7 @@ export default Vue.extend({
           };
         }
       );
-    }, console.error);
+    });  // TODO no error handling
   },
   methods: {
     getElections(): Array<ElectionPreview> {
@@ -155,7 +155,7 @@ export default Vue.extend({
       );
     },
     getVariant(election: ElectionPreview): string {
-      const variants = {
+      const variants: {[key: string]: string} = {
         CREATED: "info",
         OPENED: "warning",
         CLOSED: "info",

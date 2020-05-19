@@ -16,7 +16,7 @@ on:
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
+  test-backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose --file docker-compose-ci.yml build app web
+          docker-compose --file docker-compose-ci.yml build app
 
       - name: Run black on backend
         run: |
@@ -57,7 +57,26 @@ jobs:
         if: github.event_name == 'push'
         run: |
           docker tag apollo_app votifica/apollo-app:latest
-          docker tag apollo_web votifica/apollo-web:latest
-
           docker push votifica/apollo-app:latest
+
+  test-frontend:
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Log into registry
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.DOCKER_TOKEN }}"
+
+      - name: Build images
+        run: |
+          docker-compose --file docker-compose-ci.yml build web
+
+      - name: Tag & Push images
+        if: github.event_name == 'push'
+        run: |
+          docker build -t votifica/apollo-web:latest -f ./docker/production/frontend/Dockerfile .
           docker push votifica/apollo-web:latest

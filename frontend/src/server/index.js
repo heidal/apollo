@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Server, Model } from "miragejs";
 
 export function makeServer({ environment = "development" } = {}) {
-  const djangoListResponse = (results) => {
+  const djangoListResponse = results => {
     return {
       count: results.length,
-      results: results.models,
+      results: results.models
     };
   };
 
@@ -12,7 +14,7 @@ export function makeServer({ environment = "development" } = {}) {
     environment,
 
     models: {
-      election: Model,
+      election: Model
     },
 
     seeds(server) {
@@ -23,13 +25,13 @@ export function makeServer({ environment = "development" } = {}) {
         questions: [
           {
             id: 1,
-            question: "First question!",
+            question: "First question!"
           },
           {
             id: 2,
-            question: "Second question",
-          },
-        ],
+            question: "Second question"
+          }
+        ]
       });
       server.create("election", {
         id: 2,
@@ -38,13 +40,13 @@ export function makeServer({ environment = "development" } = {}) {
         questions: [
           {
             id: 3,
-            question: "First question!",
+            question: "First question!"
           },
           {
             id: 4,
-            question: "Second question",
-          },
-        ],
+            question: "Second question"
+          }
+        ]
       });
       server.create("election", {
         id: 3,
@@ -53,13 +55,13 @@ export function makeServer({ environment = "development" } = {}) {
         questions: [
           {
             id: 5,
-            question: "First question!",
+            question: "First question!"
           },
           {
             id: 6,
-            question: "Second question",
-          },
-        ],
+            question: "Second question"
+          }
+        ]
       });
     },
 
@@ -72,7 +74,7 @@ export function makeServer({ environment = "development" } = {}) {
       // });
 
       this.passthrough();
-    },
+    }
   });
 
   return server;

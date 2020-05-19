@@ -19,19 +19,20 @@
           <b-nav-item :active="isCreatingElection()" @click="goToGeneralInfo"
             >General info</b-nav-item
           >
-          <b-nav-item
-            :active="isAddingQuestions()"
-            @click="goToQuestions"
+          <b-nav-item :active="isAddingQuestions()" @click="goToQuestions"
             >Questions</b-nav-item
           >
-          <b-nav-item
-            :active="isAddingVoters()"
-            @click="goToVoters"
-          >Voters</b-nav-item>
+          <b-nav-item :active="isAddingVoters()" @click="goToVoters"
+            >Voters</b-nav-item
+          >
         </b-nav>
       </template>
       <b-card-body>
-        <b-form @submit.prevent="goToQuestions()" v-if="isCreatingElection()" :validated="formsValidated">
+        <b-form
+          @submit.prevent="goToQuestions()"
+          v-if="isCreatingElection()"
+          :validated="formsValidated"
+        >
           <b-form-group>
             <b-form-input
               v-model="election.title"
@@ -47,7 +48,11 @@
             >
             </b-form-textarea>
           </b-form-group>
-          <b-button type="submit" variant="primary" style="float: right;" ref="generalInfoForm"
+          <b-button
+            type="submit"
+            variant="primary"
+            style="float: right;"
+            ref="generalInfoForm"
             >Go to questions</b-button
           >
         </b-form>
@@ -163,7 +168,9 @@
                 <b-col cols="1">
                   <b-button
                     :variant="
-                      election.authorizationRules.length <= 1 ? 'outline-dark' : 'danger'
+                      election.authorizationRules.length <= 1
+                        ? 'outline-dark'
+                        : 'danger'
                     "
                     v-on:click="() => deleteRule(i)"
                     :disabled="election.authorizationRules.length <= 1"
@@ -171,7 +178,10 @@
                   ></b-button>
                 </b-col>
                 <b-col cols="3">
-                  <b-form-select v-model="election.authorizationRules[i].type" :options="ruleTypes"></b-form-select>
+                  <b-form-select
+                    v-model="election.authorizationRules[i].type"
+                    :options="ruleTypes"
+                  ></b-form-select>
                 </b-col>
                 <b-col>
                   <b-form-input
@@ -179,7 +189,7 @@
                     required
                     placeholder="Type the rule"
                     v-model="election.authorizationRules[i].value"
-                    :id="`rule-${i+1}`"
+                    :id="`rule-${i + 1}`"
                   >
                   </b-form-input>
                 </b-col>
@@ -203,7 +213,9 @@
           </b-form-group>
           <b-button
             type="submit"
-            :variant="election.authorizationRules[0].value ? 'primary' : 'outline-dark'"
+            :variant="
+              election.authorizationRules[0].value ? 'primary' : 'outline-dark'
+            "
             style="float: right;"
             :disabled="!election.authorizationRules[0].value"
             >Submit election</b-button
@@ -261,8 +273,8 @@ export default Vue.extend({
             id: null,
             type: "EXACT",
             value: null,
-          }
-        ] as Array<AuthorizationRule>
+          },
+        ] as Array<AuthorizationRule>,
       },
       flow: Flow.Election,
     };
@@ -270,12 +282,15 @@ export default Vue.extend({
   methods: {
     submitElection() {
       const electionForm = this.buildElectionForm();
-      const requestMethod = this.election.id ? this.$http.patch : this.$http.post;
-      requestMethod("/api/elections/elections/", electionForm)
-        .then((response) => {
+      const requestMethod = this.election.id
+        ? this.$http.patch
+        : this.$http.post;
+      requestMethod("/api/elections/elections/", electionForm).then(
+        (response) => {
           this.election = response.data;
           this.$router.push(`/election-detail/${this.election.id}`);
-        }, error => {
+        },
+        (error) => {
           const errors = error.response.data;
           this.formsValidated = true;
           if (errors.description || error.title) {
@@ -283,7 +298,8 @@ export default Vue.extend({
           } else if (errors.questions) {
             this.goToQuestions();
           }
-        });
+        }
+      );
     },
     isCreatingElection(): boolean {
       return this.flow === Flow.Election;
@@ -347,12 +363,12 @@ export default Vue.extend({
         id: this.election.id,
         title: this.election.title,
         description: this.election.description,
-        "authorization_rules": this.election.authorizationRules,
-        questions: this.election.questions.map(q => ({
+        authorization_rules: this.election.authorizationRules,
+        questions: this.election.questions.map((q) => ({
           id: q.id,
           question: q.question,
           answers: q.answers,
-        }))
+        })),
       };
     },
     questionsSubmitButton() {
@@ -371,7 +387,7 @@ export default Vue.extend({
     },
     goToVoters() {
       this.flow = Flow.Voters;
-    }
+    },
   },
 });
 </script>
