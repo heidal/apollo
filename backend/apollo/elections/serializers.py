@@ -1,14 +1,16 @@
+from typing import Any, Dict
+
 import django_fsm
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
+from drf_writable_nested import serializers as nested
 from apollo.elections.models import Answer, Election, Question, Vote
+from apollo.elections.models.election import VoterAuthorizationRule
 
 
 class AnswerSerializer(serializers.ModelSerializer):
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
-
     class Meta:
         model = Answer
         fields = ["id", "text", "question"]
@@ -21,6 +23,22 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ["id", "answers", "election", "question"]
+
+
+class NestedAnswerSerializer(nested.WritableNestedModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ["id", "text"]
+        read_only_fields = ["id"]
+
+
+class NestedQuestionSerializer(nested.WritableNestedModelSerializer):
+    answers = NestedAnswerSerializer(many=True)
+
+    class Meta:
+        model = Question
+        fields = ["id", "answers", "question"]
+        read_only_fields = ["id"]
 
 
 class VoteSerializer(serializers.ModelSerializer):
@@ -38,12 +56,37 @@ class VoteSerializer(serializers.ModelSerializer):
         ]
 
 
-class ElectionSerializer(serializers.ModelSerializer):
+class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
+    type = serializers.CharField()
+
+    class Meta:
+        model = VoterAuthorizationRule
+        fields = ["type", "value"]
+
+    def to_representation(self, instance: VoterAuthorizationRule) -> Dict:
+        data = super().to_representation(instance)
+
+        data["type"] = instance.get_type_display()
+        return data
+
+    def validate(self, attrs):
+        rule_type = attrs.pop("type")
+        try:
+            rule_type = getattr(VoterAuthorizationRule.Type, rule_type)
+        except AttributeError:
+            raise serializers.ValidationError("INVALID_RULE_TYPE")
+        else:
+            attrs["type"] = rule_type
+            return super().validate(attrs)
+
+
+class ElectionSerializer(nested.WritableNestedModelSerializer):
     author = serializers.HiddenField(default=CurrentUserDefault())
-    questions = QuestionSerializer(many=True, read_only=True)
+    questions = NestedQuestionSerializer(many=True)
     is_owned = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(read_only=True)
+    authorization_rules = VoterAuthorizationRuleSerializer(many=True, allow_null=True)
 
     class Meta:
         model = Election
@@ -57,7 +100,9 @@ class ElectionSerializer(serializers.ModelSerializer):
             "state",
             "public_key",
             "created_at",
+            "authorization_rules",
         ]
+        read_only_fields = ["public_key"]
 
     def get_is_owned(self, election: Election) -> bool:
         return self.context["request"].user == election.author

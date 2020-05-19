@@ -5,6 +5,8 @@ services:
     image: postgres:12.1
     env_file:
       - .envs/.local/.postgres
+    volumes:
+      - apollo-db:/var/lib/postgresql/data
 
   base:
     build:
@@ -65,3 +67,7 @@ services:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+
+volumes:
+  apollo-db:

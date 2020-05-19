@@ -351,7 +351,7 @@ version = ">=0.25.0"
 with_social = ["django-allauth (>=0.25.0)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Mypy stubs for Django"
 name = "django-stubs"
 optional = false
@@ -391,7 +391,7 @@ version = "3.11.0"
 django = ">=1.11"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "PEP-484 stubs for django-rest-framework"
 name = "djangorestframework-stubs"
 optional = false
@@ -407,6 +407,14 @@ typing-extensions = "*"
 reference = "673dc70790c671838db7b624a78a62cf4a7b7bd2"
 type = "git"
 url = "https://github.com/typeddjango/djangorestframework-stubs"
+
+[[package]]
+category = "main"
+description = "Writable nested helpers for django-rest-framework's serializers"
+name = "drf-writable-nested"
+optional = false
+python-versions = ">=3.5"
+version = "0.6.0"
 
 [[package]]
 category = "dev"
@@ -558,7 +566,7 @@ python-versions = ">=3.5"
 version = "8.2.0"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Optional static typing for Python"
 name = "mypy"
 optional = false
@@ -574,7 +582,7 @@ typing-extensions = ">=3.7.4"
 dmypy = ["psutil (>=4.0)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Experimental type system extensions for programs checked with the mypy typechecker."
 name = "mypy-extensions"
 optional = false
@@ -1178,7 +1186,7 @@ dev = ["wheel", "pytest (>=2.6.4)", "pytest-cov (>=1.8.1)", "pep8 (>=1.6.2)", "s
 twisted = ["zope.interface (>=3.6)", "twisted (>=20.3.0)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
 name = "typed-ast"
 optional = false
@@ -1186,7 +1194,7 @@ python-versions = "*"
 version = "1.4.1"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Backported and Experimental Type Hints for Python 3.5+"
 name = "typing-extensions"
 optional = false
@@ -1260,7 +1268,7 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "2bf456c712d289d548644506b943a80568b7db6d0c674d07b53aef5a9acd7ed2"
+content-hash = "a2741316694ff49ad501499737878d4a559b616248c81b4bb55b9b3551a0c13d"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1466,6 +1474,10 @@ djangorestframework = [
     {file = "djangorestframework-3.11.0.tar.gz", hash = "sha256:e782087823c47a26826ee5b6fa0c542968219263fb3976ec3c31edab23a4001f"},
 ]
 djangorestframework-stubs = []
+drf-writable-nested = [
+    {file = "drf-writable-nested-0.6.0.tar.gz", hash = "sha256:4ad864d91003f8cce56f22bc2b4fa9aa0d2e57b05b5cc5c44c8bde6e40c5cf9f"},
+    {file = "drf_writable_nested-0.6.0-py3-none-any.whl", hash = "sha256:e3c0bcdc3ca92af0a16474868bb3bc487df0f62a8010f824f20141fc87557301"},
+]
 execnet = [
     {file = "execnet-1.7.1-py2.py3-none-any.whl", hash = "sha256:d4efd397930c46415f62f8a31388d6be4f27a91d7550eb79bc64a756e0056547"},
     {file = "execnet-1.7.1.tar.gz", hash = "sha256:cacb9df31c9680ec5f95553976c4da484d407e85e41c83cb812aa014f0eddc50"},

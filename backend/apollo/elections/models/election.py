@@ -1,3 +1,5 @@
+import regex
+
 from django.db import models
 from django.utils.timezone import now
 from django_fsm import FSMField, transition
@@ -61,3 +63,23 @@ class Election(models.Model):
     @property
     def state_string(self) -> str:
         return str(Election.State.choices[self.state])
+
+
+class VoterAuthorizationRule(models.Model):
+    class Type(Choices):
+        EXACT = Choice(0, "EXACT")
+        REGEX = Choice(1, "REGEX")
+
+    election = models.ForeignKey(
+        Election, on_delete=models.CASCADE, related_name="authorization_rules"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    type = models.IntegerField(choices=Type.choices)
+    value = models.CharField(max_length=100)
+
+    def is_authorized(self, name: str) -> bool:
+        if self.type == self.Type.EXACT:
+            return self.value == name
+        elif self.type == self.Type.REGEX:
+            return regex.fullmatch(self.value, name) is not None
+        raise ValueError("VoterAuthorizationRule.Type invalid type")

@@ -1,17 +1,4 @@
 <style lang="scss" scoped>
-.questions-submit {
-  position: -webkit-sticky; /* Safari */
-  position: fixed;
-  bottom: 100px;
-  right: 100px;
-
-  width: 15em;
-  padding: 1em;
-  opacity: 1;
-  transition: visibility 0s opacity 0.5s linear;
-  visibility: visible;
-}
-
 .election-form {
   max-width: 40em;
   margin-left: auto;
@@ -33,15 +20,18 @@
             >General info</b-nav-item
           >
           <b-nav-item
-            disabled
             :active="isAddingQuestions()"
             @click="goToQuestions"
             >Questions</b-nav-item
           >
+          <b-nav-item
+            :active="isAddingVoters()"
+            @click="goToVoters"
+          >Voters</b-nav-item>
         </b-nav>
       </template>
       <b-card-body>
-        <b-form @submit.prevent="goToQuestions()" v-if="isCreatingElection()">
+        <b-form @submit.prevent="goToQuestions()" v-if="isCreatingElection()" :validated="formsValidated">
           <b-form-group>
             <b-form-input
               v-model="election.title"
@@ -57,14 +47,15 @@
             >
             </b-form-textarea>
           </b-form-group>
-          <b-button type="submit" variant="primary" style="float: right;"
+          <b-button type="submit" variant="primary" style="float: right;" ref="generalInfoForm"
             >Go to questions</b-button
           >
         </b-form>
 
         <b-form
-          @submit.prevent="createElection()"
+          @submit.prevent="goToVoters()"
           v-else-if="isAddingQuestions()"
+          :validated="formsValidated"
         >
           <b-form-group
             v-for="(e, i) in election.questions.length"
@@ -131,7 +122,7 @@
                 >
                   <b-button
                     v-on:click="addAnotherAnswer(i)"
-                    variant="outline-primary"
+                    variant="outline-info"
                     size="sm"
                     style="float: right;"
                     ><span class="glyphicon glyphicon-plus"
@@ -143,7 +134,7 @@
             </b-collapse>
             <b-button
               style="margin-top: 2em;"
-              variant="primary"
+              variant="info"
               v-if="i === election.questions.length - 1"
               v-on:click="addAnotherQuestion()"
               >Add another question</b-button
@@ -151,11 +142,71 @@
           </b-form-group>
           <b-button
             type="submit"
-            class="questions-submit"
             variant="primary"
-            size="lg"
-            v-bind:class="questionsSubmitButton()"
-            >Create election!</b-button
+            style="float: right;"
+            ref="questionsForm"
+            >Go to voters</b-button
+          >
+        </b-form>
+        <b-form
+          @submit.prevent="submitElection()"
+          v-else-if="isAddingVoters()"
+          :validated="formsValidated"
+        >
+          <b-form-group
+            v-for="(e, i) in election.authorizationRules.length"
+            :key="i"
+            :label="`Rule #${i + 1}`"
+          >
+            <b-container class="pr-0">
+              <b-row align-v="stretch" align-h="start" no-gutters>
+                <b-col cols="1">
+                  <b-button
+                    :variant="
+                      election.authorizationRules.length <= 1 ? 'outline-dark' : 'danger'
+                    "
+                    v-on:click="() => deleteRule(i)"
+                    :disabled="election.authorizationRules.length <= 1"
+                    ><b-icon-trash></b-icon-trash
+                  ></b-button>
+                </b-col>
+                <b-col cols="3">
+                  <b-form-select v-model="election.authorizationRules[i].type" :options="ruleTypes"></b-form-select>
+                </b-col>
+                <b-col>
+                  <b-form-input
+                    type="text"
+                    required
+                    placeholder="Type the rule"
+                    v-model="election.authorizationRules[i].value"
+                    :id="`rule-${i+1}`"
+                  >
+                  </b-form-input>
+                </b-col>
+              </b-row>
+            </b-container>
+
+            <div
+              class="add-answer-wrapper"
+              v-if="i === election.authorizationRules.length - 1"
+            >
+              <b-button
+                v-on:click="addAnotherRule()"
+                variant="outline-info"
+                size="sm"
+                style="float: right;"
+                ><span class="glyphicon glyphicon-plus"
+                  ><b-icon-plus></b-icon-plus>Add another rule</span
+                ></b-button
+              >
+            </div>
+          </b-form-group>
+          <b-button
+            type="submit"
+            :variant="election.authorizationRules[0].value ? 'primary' : 'outline-dark'"
+            style="float: right;"
+            :disabled="!election.authorizationRules[0].value"
+            >Submit election</b-button
           >
         </b-form>
       </b-card-body>
@@ -168,6 +219,7 @@ import Vue from "vue";
 enum Flow {
   Election,
   Questions,
+  Voters,
 }
 
 interface Answer {
@@ -181,9 +233,17 @@ interface Question {
   visible: boolean;
 }
 
+interface AuthorizationRule {
+  id: number | null;
+  type: "REGEX" | "EXACT";
+  value: string | null;
+}
+
 export default Vue.extend({
   data: function () {
     return {
+      formsValidated: false,
+      ruleTypes: ["REGEX", "EXACT"],
       election: {
         id: null,
         title: null,
@@ -196,21 +256,34 @@ export default Vue.extend({
             visible: true,
           },
         ] as Array<Question>,
+        authorizationRules: [
+          {
+            id: null,
+            type: "EXACT",
+            value: null,
+          }
+        ] as Array<AuthorizationRule>
       },
       flow: Flow.Election,
     };
   },
-  created: function () {
-    this.$store.getters.isAuthenticated;
-  },
   methods: {
-    createElection() {
-      this.$http
-        .post("/api/elections/elections/", this.election)
+    submitElection() {
+      const electionForm = this.buildElectionForm();
+      const requestMethod = this.election.id ? this.$http.patch : this.$http.post;
+      requestMethod("/api/elections/elections/", electionForm)
         .then((response) => {
-          this.election.id = response.data.id;
-          this.submitQuestions();
-        }, console.error);
+          this.election = response.data;
+          this.$router.push(`/election-detail/${this.election.id}`);
+        }, error => {
+          const errors = error.response.data;
+          this.formsValidated = true;
+          if (errors.description || error.title) {
+            this.goToGeneralInfo();
+          } else if (errors.questions) {
+            this.goToQuestions();
+          }
+        });
     },
     isCreatingElection(): boolean {
       return this.flow === Flow.Election;
@@ -218,12 +291,22 @@ export default Vue.extend({
     isAddingQuestions(): boolean {
       return this.flow === Flow.Questions;
     },
+    isAddingVoters(): boolean {
+      return this.flow === Flow.Voters;
+    },
     addAnotherQuestion() {
       this.election.questions.push({
         id: null,
         question: null,
         answers: [{ text: null }],
         visible: true,
+      });
+    },
+    addAnotherRule() {
+      this.election.authorizationRules.push({
+        id: null,
+        type: "EXACT",
+        value: null,
       });
     },
     deleteQuestion(questionId: number) {
@@ -241,6 +324,14 @@ export default Vue.extend({
         answers.splice(answerId, 1);
       }
     },
+    deleteRule(ruleId: number) {
+      const rules = this.election.authorizationRules;
+      if (rules.length <= 1) {
+        return;
+      } else {
+        rules.splice(ruleId, 1);
+      }
+    },
     toggleCollapse(questionId: number) {
       this.election.questions[questionId].visible = !this.election.questions[
         questionId
@@ -251,29 +342,18 @@ export default Vue.extend({
         text: null,
       });
     },
-    submitQuestions() {
-      const questionResponses = this.election.questions.map((question) =>
-        this.$http.post("/api/elections/questions/", {
-          question: question.question,
-          election: this.election.id,
-        })
-      );
-      Promise.all(questionResponses).then((createdQuestions) => {
-        const answerResponses = createdQuestions
-          .flatMap((question, i) =>
-            this.election.questions[i].answers.map((answer) => ({
-              text: answer.text,
-              question: question.data.id,
-            }))
-          )
-          .map((answerData) =>
-            this.$http.post("/api/elections/answers/", answerData)
-          );
-
-        Promise.all(answerResponses).then(() => {
-          this.$router.push(`/election-detail/${this.election.id}`);
-        }, console.error);
-      });
+    buildElectionForm() {
+      return {
+        id: this.election.id,
+        title: this.election.title,
+        description: this.election.description,
+        "authorization_rules": this.election.authorizationRules,
+        questions: this.election.questions.map(q => ({
+          id: q.id,
+          question: q.question,
+          answers: q.answers,
+        }))
+      };
     },
     questionsSubmitButton() {
       return {
@@ -283,12 +363,15 @@ export default Vue.extend({
           this.election.questions[0].question.length === 0,
       };
     },
-    goToQuestions() {
-      this.flow = Flow.Questions;
-    },
     goToGeneralInfo() {
       this.flow = Flow.Election;
     },
+    goToQuestions() {
+      this.flow = Flow.Questions;
+    },
+    goToVoters() {
+      this.flow = Flow.Voters;
+    }
   },
 });
 </script>

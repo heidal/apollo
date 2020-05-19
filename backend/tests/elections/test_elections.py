@@ -1,4 +1,4 @@
-from typing import Optional, Callable
+from typing import Optional, Callable, List, Dict
 
 from pytest import mark, fixture, lazy_fixture
 from rest_framework.response import Response
@@ -12,12 +12,25 @@ from typing_extensions import TypedDict
 pytestmark = mark.django_db
 
 
-ElectionPostData = TypedDict("ElectionPostData", {"description": str, "title": str})
+ElectionPostData = TypedDict(
+    "ElectionPostData",
+    {
+        "description": str,
+        "title": str,
+        "authorization_rules": List[str],
+        "questions": List[Dict],
+    },
+)
 
 
 @fixture
 def election_data() -> ElectionPostData:
-    return {"description": "Election description", "title": "Election title"}
+    return {
+        "description": "Election description",
+        "title": "Election title",
+        "authorization_rules": [],
+        "questions": [],
+    }
 
 
 def _post_endpoint(url: str, data: Optional[dict], user: User) -> Response:
