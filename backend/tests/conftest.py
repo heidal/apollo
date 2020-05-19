@@ -12,10 +12,11 @@ register(factories.ElectionFactory, state=Election.State.CREATED)
 register(factories.ElectionFactory, "opened_election", state=Election.State.OPENED)
 register(factories.ElectionFactory, "frozen_election", state=Election.State.CLOSED)
 
-
 register(factories.QuestionFactory)
 register(factories.AnswerFactory)
 register(factories.VoteFactory)
+
+register(factories.VoterAuthorizationRuleFactory)
 
 
 @fixture(scope="session")

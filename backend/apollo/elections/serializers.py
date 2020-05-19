@@ -1,13 +1,16 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
+
+from apollo.elections import permissions
 
 import django_fsm
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
 from drf_writable_nested import serializers as nested
 from apollo.elections.models import Answer, Election, Question, Vote
 from apollo.elections.models.election import VoterAuthorizationRule
+from apollo.common import serializers as apollo_serializers
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -41,7 +44,15 @@ class NestedQuestionSerializer(nested.WritableNestedModelSerializer):
         read_only_fields = ["id"]
 
 
-class VoteSerializer(serializers.ModelSerializer):
+class VoteSerializer(
+    apollo_serializers.AuthorizedSerializer, serializers.ModelSerializer
+):
+    def authorize(self, attrs):
+        user = self.context["request"].user
+        election = attrs["answer"].question.election
+        if not permissions.can_vote_in_election(user, election):
+            raise exceptions.PermissionDenied("VOTE_UNAUTHORIZED")
+
     answer = serializers.PrimaryKeyRelatedField(queryset=Answer.objects.all())
     author = serializers.HiddenField(default=CurrentUserDefault())
 
@@ -80,13 +91,16 @@ class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
             return super().validate(attrs)
 
 
-class ElectionSerializer(nested.WritableNestedModelSerializer):
+class ElectionSerializer(
+    apollo_serializers.AuthorizedSerializer, nested.WritableNestedModelSerializer
+):
     author = serializers.HiddenField(default=CurrentUserDefault())
     questions = NestedQuestionSerializer(many=True)
     is_owned = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(read_only=True)
     authorization_rules = VoterAuthorizationRuleSerializer(many=True, allow_null=True)
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = Election
@@ -101,6 +115,7 @@ class ElectionSerializer(nested.WritableNestedModelSerializer):
             "public_key",
             "created_at",
             "authorization_rules",
+            "permissions"
         ]
         read_only_fields = ["public_key"]
 
@@ -110,6 +125,27 @@ class ElectionSerializer(nested.WritableNestedModelSerializer):
     @staticmethod
     def get_state(election: Election) -> str:
         return election.state_string
+
+    def authorize(self, attrs):
+        if getattr(self.instance, "pk", None) is None:
+            return  # it means that we're creating the election, so we must be the owner
+
+        user = self.context["request"].user
+        election = self.instance
+        if not permissions.can_edit_election(user, election):
+            raise exceptions.PermissionDenied("CANNOT_EDIT_ELECTION")
+
+    def get_permissions(self, election: Election) -> List[str]:
+        user = self.context["request"].user
+        user_permissions = []
+
+        if permissions.can_edit_election(user, election):
+            user_permissions.append("CAN_EDIT")
+
+        if permissions.can_vote_in_election(user, election):
+            user_permissions.append("CAN_VOTE")
+
+        return user_permissions
 
 
 class ElectionTransitionSerializer(serializers.ModelSerializer):
