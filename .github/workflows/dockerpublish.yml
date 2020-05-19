@@ -60,6 +60,7 @@ jobs:
           docker push votifica/apollo-app:latest
 
   test-frontend:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
