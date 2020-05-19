@@ -1,1 +1,3 @@
-import("./app").catch((e) => console.error("Couldn't import app.ts"));
+/* eslint-disable no-console */
+
+import("./app").catch(() => console.error("Couldn't import app.ts"));

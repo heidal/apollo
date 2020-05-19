@@ -10,7 +10,7 @@
 import Vue from "vue";
 import { ApiElection } from "@/api/elections";
 import ElectionVoteForm, { Vote } from "@/components/ElectionVoteForm.vue";
-import {AxiosError} from "axios";
+import { AxiosError } from "axios";
 
 export default Vue.extend({
   components: {
@@ -33,9 +33,7 @@ export default Vue.extend({
   methods: {
     voteInElection: function (votes: Array<Vote>) {
       const results = votes.map((vote) => {
-        console.log(vote);
         if (vote.selected === null) {
-          console.error("Vote is null");
           return Promise.reject("Vote is null");
         }
 
@@ -43,19 +41,22 @@ export default Vue.extend({
 
         return this.$http.post("/api/elections/votes/", { answer });
       });
-      Promise.all(results).then(() => {
-        this.$router.push("/");
-      }, error => {
-        this.handleErrors(error);
-      });
+      Promise.all(results).then(
+        () => {
+          this.$router.push("/");
+        },
+        (error) => {
+          this.handleErrors(error);
+        }
+      );
     },
     handleErrors(error: AxiosError) {
       if (error.response?.status === 403) {
         this.voteError = "You're not authorized to vote in this election.";
       } else {
-        this.voteError = `Unknown error: ${error.response?.data}`
+        this.voteError = `Unknown error: ${error.response?.data}`;
       }
-    }
+    },
   },
 });
 </script>
