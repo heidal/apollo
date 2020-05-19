@@ -106,10 +106,8 @@ class VoteViewSet(viewsets.GenericViewSet):
     serializer_class = VoteSerializer
 
     def create(self, request):
-        print(request.data)
         try:
             answer_id_ciphertext = request.data["answer"]
-            ephemeral_pk = request.data["pk"]
             election_id = request.data["election"]
         except KeyError as e:
             return Response(f"Key {e} not found", status=status.HTTP_400_BAD_REQUEST)
@@ -118,22 +116,18 @@ class VoteViewSet(viewsets.GenericViewSet):
 
         try:
             encoder = nacl.encoding.Base64Encoder()
-
             election_sk = nacl.public.PrivateKey(
                 election.secret_key.encode("ascii"),
                 encoder
             )
+            sealed_box = nacl.public.SealedBox(election_sk)
+            answer_id = sealed_box.decrypt(answer_id_ciphertext, encoder).decode("utf-8")
+        except nacl.exceptions.CryptoError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-            ephemeral_pk = nacl.public.PublicKey(
-                ephemeral_pk.encode("ascii"),
-                encoder
-            )
-
-            box = nacl.public.Box(election_sk, ephemeral_pk)
-
-            answer_id = box.decrypt(answer_id_ciphertext.encode("ascii")).decode("ascii")
-        except nacl.exceptions.CryptoError as e:
-            return Response("Sth went wrong {e}", status=status.HTTP_400_BAD_REQUEST)
+        answer = get_object_or_404(Answer, pk=answer_id)
+        if answer.question.election.id != election_id:
+            return Response("Wrong election id", status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(data={"answer": answer_id})
         serializer.is_valid(raise_exception=True)

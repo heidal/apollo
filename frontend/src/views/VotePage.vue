@@ -43,7 +43,10 @@ export default Vue.extend({
 
         const [question, answer] = vote.selected.split(".");
 
-        return this.$http.post("/api/elections/votes/", { answer: encrypt(this.election.public_key, answer) });
+        return this.$http.post(
+          "/api/elections/votes/",
+          { answer: encrypt(this.election.public_key, answer), election: this.election.id }
+        );
       });
       Promise.all(results).then(
         () => {
