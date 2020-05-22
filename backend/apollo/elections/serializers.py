@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -83,7 +83,10 @@ class VoteSerializer(
     def is_valid(self, raise_exception):
         try:
             answer_id = self._decrypt_answer()
-        except (KeyError, CryptoError, ValidationError):
+        except KeyError as e:
+            if raise_exception:
+                raise ValidationError(f"Missing parameter {e}")
+        except (CryptoError, ValidationError):
             if raise_exception:
                 raise ValidationError()
 
