@@ -259,10 +259,8 @@ interface AuthorizationRuleError {
   value: string | null;
 }
 
-interface ApiErrors {
-  authorization_rules: Array<{
-    [key: string]: { [key: string]: Array<string> };
-  }>;
+interface AuthorizationRuleApiError {
+  value: Array<string>,
 }
 
 export default Vue.extend({
@@ -315,8 +313,8 @@ export default Vue.extend({
           } else if (errors.questions) {
             this.goToQuestions();
           }
-          errors["authorization_rules"].forEach((e: ApiErrors, i: number) => {
-            this.errors.rules[i].value = this.getErrorString(e.value);
+          errors["authorization_rules"].forEach((e: AuthorizationRuleApiError, i: number) => {
+            this.errors.rules[i].value = this.getErrorString(e.value[0]);
           });
         }
       );
