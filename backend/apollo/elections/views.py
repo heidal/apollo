@@ -1,14 +1,12 @@
 from typing import List
 
-from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from rest_framework import status, viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
-import nacl
 
 from apollo.common.permissions import get_default_permission_classes
 from apollo.elections.models import Answer, Election, Question, Vote
@@ -101,34 +99,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return [perm() for perm in permission_classes]
 
 
-class VoteViewSet(viewsets.GenericViewSet):
+class VoteViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
-
-    def create(self, request):
-        try:
-            answer_id_ciphertext = request.data["answer"]
-            election_id = request.data["election"]
-        except KeyError as e:
-            return Response(f"Key {e} not found", status=status.HTTP_400_BAD_REQUEST)
-
-        election = get_object_or_404(Election, pk=election_id)
-
-        try:
-            encoder = nacl.encoding.Base64Encoder()
-            election_sk = nacl.public.PrivateKey(
-                election.secret_key.encode("ascii"), encoder
-            )
-            sealed_box = nacl.public.SealedBox(election_sk)
-            answer_id = sealed_box.decrypt(answer_id_ciphertext, encoder).decode()
-        except nacl.exceptions.CryptoError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        answer = get_object_or_404(Answer, pk=answer_id)
-        if answer.question.election.id != election_id:
-            return Response("Wrong election id", status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = self.get_serializer(data={"answer": answer_id})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)

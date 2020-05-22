@@ -1,5 +1,8 @@
 from typing import Any, Dict, List
 
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
+
 from apollo.elections import permissions
 
 import django_fsm
@@ -11,6 +14,7 @@ from drf_writable_nested import serializers as nested
 from apollo.elections.models import Answer, Election, Question, Vote
 from apollo.elections.models.election import VoterAuthorizationRule
 from apollo.common import serializers as apollo_serializers
+from apollo.elections.crypto import decrypt, CryptoError
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -55,16 +59,52 @@ class VoteSerializer(
 
     answer = serializers.PrimaryKeyRelatedField(queryset=Answer.objects.all())
     author = serializers.HiddenField(default=CurrentUserDefault())
+    election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all(), write_only=True)
 
     class Meta:
         model = Vote
-        fields = ["id", "answer", "author"]
+        fields = ["id", "answer", "author", "election"]
         read_only_fields = ["id"]
+        write_only_fields = ["election"]
         validators = [
             UniqueTogetherValidator(
                 queryset=Vote.objects.all(), fields=["author", "answer"]
             )
         ]
+
+    def is_valid(self, raise_exception=False):
+        try:
+            answer_id_ciphertext = self.initial_data["answer"]
+            election_id = self.initial_data["election"]
+        except KeyError:
+            if raise_exception:
+                raise ValidationError()
+            return False
+
+        election = get_object_or_404(Election, pk=election_id)
+
+        try:
+            answer_id = decrypt(election.secret_key, answer_id_ciphertext)
+        except CryptoError:
+            if raise_exception:
+                raise ValidationError()
+            return False
+
+        answer = get_object_or_404(Answer, pk=answer_id)
+
+        if answer.question.election.id != election_id:
+            if raise_exception:
+                raise ValidationError()
+            return False
+
+        self.initial_data["answer"] = answer_id
+
+        return super().is_valid(raise_exception)
+
+    def create(self, validated_data):
+        validated_data.pop("election")
+        vote = Vote.objects.create(**validated_data)
+        return vote
 
 
 class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
