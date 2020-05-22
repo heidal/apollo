@@ -13,9 +13,7 @@ def decrypt(election_secret_key: str, ciphertext: str) -> str:
         )
         sealed_box = nacl.public.SealedBox(election_sk)
         message = sealed_box.decrypt(ciphertext, encoder).decode()
-    except TypeError as e:
-        raise
-    except nacl.exceptions.CryptoError as e:
+    except (TypeError, nacl.exceptions.CryptoError) as e:
         raise CryptoError from e
 
     return message
