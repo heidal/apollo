@@ -1,7 +1,7 @@
 from typing import List
 
 from django_filters import rest_framework as filters
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import SAFE_METHODS, BasePermission

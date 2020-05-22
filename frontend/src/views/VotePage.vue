@@ -11,6 +11,7 @@ import Vue from "vue";
 import { ApiElection } from "@/api/elections";
 import ElectionVoteForm, { Vote } from "@/components/ElectionVoteForm.vue";
 import { AxiosError } from "axios";
+import { encrypt } from "@/crypto/encryption";
 
 export default Vue.extend({
   components: {
@@ -36,10 +37,16 @@ export default Vue.extend({
         if (vote.selected === null) {
           return Promise.reject("Vote is null");
         }
+        if (this.election === null) {
+          return Promise.reject("Election is null");
+        }
 
         const [question, answer] = vote.selected.split(".");
 
-        return this.$http.post("/api/elections/votes/", { answer });
+        return this.$http.post(
+          "/api/elections/votes/",
+          { answer: encrypt(this.election.public_key, answer), election: this.election.id }
+        );
       });
       Promise.all(results).then(
         () => {

@@ -1,4 +1,7 @@
-from typing import Any, Dict, List
+from typing import Dict, List
+
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 
 from apollo.elections import permissions
 
@@ -11,6 +14,7 @@ from drf_writable_nested import serializers as nested
 from apollo.elections.models import Answer, Election, Question, Vote
 from apollo.elections.models.election import VoterAuthorizationRule
 from apollo.common import serializers as apollo_serializers
+from apollo.elections.crypto import decrypt, CryptoError
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -65,6 +69,29 @@ class VoteSerializer(
                 queryset=Vote.objects.all(), fields=["author", "answer"]
             )
         ]
+
+    def _decrypt_answer(self):
+        election = get_object_or_404(Election, pk=self.initial_data.pop("election"))
+        answer_id = decrypt(election.secret_key, self.initial_data["answer"])
+        answer = get_object_or_404(Answer, pk=answer_id)
+
+        if answer.question.election.id != election.id:
+            raise ValidationError()
+
+        return answer_id
+
+    def is_valid(self, raise_exception):
+        try:
+            answer_id = self._decrypt_answer()
+        except KeyError as e:
+            if raise_exception:
+                raise ValidationError(f"Missing parameter {e}")
+        except (CryptoError, ValidationError):
+            if raise_exception:
+                raise ValidationError()
+
+        self.initial_data["answer"] = answer_id
+        return super().is_valid(raise_exception)
 
 
 class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
