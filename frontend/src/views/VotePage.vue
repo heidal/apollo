@@ -15,25 +15,23 @@ import { encrypt } from "@/crypto/encryption";
 
 export default Vue.extend({
   components: {
-    ElectionVoteForm,
+    ElectionVoteForm
   },
-  data: function () {
+  data: function() {
     return {
       election: null as ApiElection | null,
-      voteError: null as string | null,
+      voteError: null as string | null
     };
   },
-  created: function () {
+  created: function() {
     const electionId = this.$router.currentRoute.params.electionId;
-    this.$http
-      .get(`/api/elections/elections/${electionId}/`)
-      .then((response) => {
-        this.election = response.data;
-      });
+    this.$http.get(`/api/elections/elections/${electionId}/`).then(response => {
+      this.election = response.data;
+    });
   },
   methods: {
-    voteInElection: function (votes: Array<Vote>) {
-      const results = votes.map((vote) => {
+    voteInElection: function(votes: Array<Vote>) {
+      const results = votes.map(vote => {
         if (vote.selected === null) {
           return Promise.reject("Vote is null");
         }
@@ -41,7 +39,7 @@ export default Vue.extend({
           return Promise.reject("Election is null");
         }
 
-        const [question, answer] = vote.selected.split(".");
+        const answer = vote.selected.split(".")[1];
 
         return this.$http.post(
           "/api/elections/votes/",
@@ -52,7 +50,7 @@ export default Vue.extend({
         () => {
           this.$router.push("/");
         },
-        (error) => {
+        error => {
           this.handleErrors(error);
         }
       );
@@ -63,7 +61,7 @@ export default Vue.extend({
       } else {
         this.voteError = `Unknown error: ${error.response?.data}`;
       }
-    },
-  },
+    }
+  }
 });
 </script>

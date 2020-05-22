@@ -83,15 +83,20 @@ export default Vue.extend({
       user: {
         password1: null,
         password2: null,
-        email: null,
+        email: null
       },
       errors: {
         password1: [],
         password2: [],
         email: [],
-        nonFieldErrors: [],
-      } as { [key: string]: Array<string> },
+        nonFieldErrors: []
+      } as { [key: string]: Array<string> }
     };
+  },
+  computed: {
+    isLogged() {
+      return this.$store.state.sessionKey === null;
+    }
   },
   methods: {
     signupWithPassword() {
@@ -99,25 +104,20 @@ export default Vue.extend({
         () => {
           this.$router.push("/login");
         },
-        (error) => {
+        error => {
           const newErrors = error.response.data;
           this.errors = {
             password1: newErrors.password1 ?? [],
             password2: newErrors.password2 ?? [],
             email: newErrors.email ?? [],
-            nonFieldErrors: newErrors.non_field_errors ?? [],
+            nonFieldErrors: newErrors.non_field_errors ?? []
           };
         }
       );
     },
     noErrors(label?: string) {
       return this.errors[label ?? "nonFieldErrors"].length === 0;
-    },
-  },
-  computed: {
-    isLogged() {
-      return this.$store.state.sessionKey === null;
-    },
-  },
+    }
+  }
 });
 </script>

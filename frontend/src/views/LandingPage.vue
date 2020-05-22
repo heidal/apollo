@@ -28,10 +28,7 @@
 
       <hr class="my-4" />
 
-      <b-button
-        variant="outline-primary"
-        size="lg"
-        v-on:click="goToCreateElection"
+      <b-button variant="outline-primary" size="lg" @click="goToCreateElection"
         >Create your own election!</b-button
       >
       <p>or</p>
@@ -43,7 +40,7 @@
         class="elections-list"
         :show-pagination="false"
         :verbose="false"
-        v-bind:pageSize="3"
+        :page-size="3"
       />
     </div>
   </div>
@@ -56,12 +53,12 @@ import ElectionsList from "@/components/ElectionsList.vue";
 export default {
   name: "Home",
   components: {
-    ElectionsList,
+    ElectionsList
   },
   methods: {
-    goToCreateElection: function () {
+    goToCreateElection: function() {
       this.$router.push("/create-election");
-    },
-  },
+    }
+  }
 };
 </script>

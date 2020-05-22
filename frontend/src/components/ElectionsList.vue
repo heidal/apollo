@@ -107,31 +107,36 @@ export default Vue.extend({
     pageSize: {
       type: Number,
       default: 10,
-      validator: function (value) {
+      validator: function(value) {
         return value >= 0;
-      },
+      }
     },
     showPagination: {
       type: Boolean,
-      default: true,
+      default: true
     },
     verbose: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   data() {
     return {
       elections: [] as Array<ElectionPreview>,
-      currentPage: 1,
+      currentPage: 1
     };
   },
+  computed: {
+    rows(): number {
+      return this.elections.length;
+    }
+  },
   created() {
-    this.$http.get("/api/elections/elections/").then((response) => {
+    this.$http.get("/api/elections/elections/").then(response => {
       this.elections = response.data.results.map(
         (election: ApiElection): ElectionPreview => {
           const daysAgo = Math.floor(
-            ((new Date()).valueOf() - Date.parse(election.created_at).valueOf()) /
+            (new Date().valueOf() - Date.parse(election.created_at).valueOf()) /
               (1000 * 60 * 60 * 24)
           );
           return {
@@ -141,11 +146,11 @@ export default Vue.extend({
             questionsCount: election.questions.length,
             daysAgo: daysAgo > 0 ? `${daysAgo} days ago` : "today",
             status: election.state,
-            publicKey: election.public_key,
+            publicKey: election.public_key
           };
         }
       );
-    });  // TODO no error handling
+    }); // TODO no error handling
   },
   methods: {
     getElections(): Array<ElectionPreview> {
@@ -155,18 +160,13 @@ export default Vue.extend({
       );
     },
     getVariant(election: ElectionPreview): string {
-      const variants: {[key: string]: string} = {
+      const variants: { [key: string]: string } = {
         CREATED: "info",
         OPENED: "warning",
-        CLOSED: "info",
+        CLOSED: "info"
       };
       return variants[election.status];
-    },
-  },
-  computed: {
-    rows(): number {
-      return this.elections.length;
-    },
-  },
+    }
+  }
 });
 </script>

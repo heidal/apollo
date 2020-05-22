@@ -53,10 +53,10 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {Dictionary} from "vue-router/types/router";
+import { Dictionary } from "vue-router/types/router";
 
 interface Errors {
-  nonFieldErrors: Array<string>
+  nonFieldErrors: Array<string>;
 }
 
 export default Vue.extend({
@@ -64,30 +64,12 @@ export default Vue.extend({
     return {
       user: {
         password: null,
-        email: null,
+        email: null
       },
       errors: {
-        nonFieldErrors: [],
-      } as Errors,
+        nonFieldErrors: []
+      } as Errors
     };
-  },
-  methods: {
-    loginWithPassword() {
-      this.$http.post("/api/rest-auth/login/", this.user).then(
-        (response) => {
-          // the TS error below is due to some bug in vue-router
-          /* eslint-disable @typescript-eslint/ban-ts-ignore */
-          // @ts-ignore
-          const query: Dictionary<string> = this.$route.query;
-          this.$store.commit("setSessionKey", response.data.key);
-          this.$router.push(query.next || "/");
-        },
-        (error) => {
-          this.errors.nonFieldErrors =
-            error.response.data["non_field_errors"] ?? [];
-        }
-      );
-    },
   },
   computed: {
     isLogged(): boolean {
@@ -95,7 +77,25 @@ export default Vue.extend({
     },
     noErrors(): boolean {
       return this.errors.nonFieldErrors.length === 0;
-    },
+    }
   },
+  methods: {
+    loginWithPassword() {
+      this.$http.post("/api/rest-auth/login/", this.user).then(
+        response => {
+          // the TS error below is due to some bug in vue-router
+          /* eslint-disable @typescript-eslint/ban-ts-ignore */
+          // @ts-ignore
+          const query: Dictionary<string> = this.$route.query;
+          this.$store.commit("setSessionKey", response.data.key);
+          this.$router.push(query.next || "/");
+        },
+        error => {
+          this.errors.nonFieldErrors =
+            error.response.data["non_field_errors"] ?? [];
+        }
+      );
+    }
+  }
 });
 </script>

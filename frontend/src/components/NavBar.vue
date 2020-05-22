@@ -12,10 +12,10 @@
     </b-navbar-brand>
     <b-navbar-nav class="ml-auto">
       <b-nav-item to="/elections">Elections</b-nav-item>
-      <b-nav-item to="/login" v-if="!this.$store.getters.isAuthenticated"
+      <b-nav-item v-if="!this.$store.getters.isAuthenticated" to="/login"
         >Login</b-nav-item
       >
-      <b-nav-item to="/logout" v-else href="/logout#">Logout</b-nav-item>
+      <b-nav-item v-else to="/logout" href="/logout#">Logout</b-nav-item>
     </b-navbar-nav>
   </b-navbar>
 </template>
