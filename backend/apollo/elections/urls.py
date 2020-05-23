@@ -7,7 +7,7 @@ app_name = "elections"
 
 router = DefaultRouter()
 router.register("answers", views.AnswerViewSet)
-router.register("elections", views.ElectionViewSet, basename='election')
+router.register("elections", views.ElectionViewSet, basename="election")
 router.register("questions", views.QuestionViewSet)
 router.register("votes", views.VoteViewSet)
 

@@ -57,12 +57,14 @@ class ElectionViewSet(viewsets.ModelViewSet):
         return Election.objects.filter(
             Q(visibility=Election.Visibility.PUBLIC)
             | Q(author=self.request.user)
-            | Q(Exists(
-                VoterAuthorizationRule.objects.filter(
-                    type=VoterAuthorizationRule.Type.EXACT,
-                    value=self.request.user.email,
+            | Q(
+                Exists(
+                    VoterAuthorizationRule.objects.filter(
+                        type=VoterAuthorizationRule.Type.EXACT,
+                        value=self.request.user.email,
+                    )
                 )
-            ))
+            )
         )
 
     def get_permissions(self) -> List[BasePermission]:
