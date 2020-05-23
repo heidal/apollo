@@ -1,4 +1,4 @@
-FROM votifica/apollo-base:latest
+FROM apollo-base
 
 USER django
 

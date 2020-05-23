@@ -1,10 +1,11 @@
 <template>
   <div>
     <election-form
-      :errors="errors"
+      :voters="election.voters"
       :validated="validated"
       :election="election"
       :step="step"
+      :errors="errors"
       @electionSubmitted="onElectionSubmitted"
       @goToGeneralInfo="goToGeneralInfo"
       @goToQuestions="goToQuestions"
@@ -19,10 +20,7 @@ import Vue from "vue";
 import ElectionForm from "@/components/ElectionForm.vue";
 import {
   Flow,
-  AuthorizationRuleError,
-  AuthorizationRuleApiError,
   ElectionFormData,
-  AuthorizationRule,
   Question
 } from "@/components/ElectionForm.vue";
 
@@ -44,19 +42,14 @@ export default Vue.extend({
             visible: true
           }
         ] as Array<Question>,
-        authorizationRules: [
-          {
-            id: null,
-            type: "EXACT",
-            value: null
-          }
-        ] as Array<AuthorizationRule>
+        voters: "",
+        public: false
+      },
+      errors: {
+        voters: null as string | null
       },
       validated: false,
-      ruleTypes: ["REGEX", "EXACT"],
-      errors: {
-        rules: [{ value: null }] as Array<AuthorizationRuleError>
-      },
+      ruleTypes: ["EXACT"],
       step: Flow.Election
     };
   },
@@ -77,13 +70,10 @@ export default Vue.extend({
             this.goToQuestions();
           }
           if (errors["authorization_rules"] !== undefined) {
-            errors["authorization_rules"].forEach(
-              (e: AuthorizationRuleApiError, i: number) => {
-                this.errors.rules[i].value = this.getErrorString(e.value[0]);
-              }
-            );
+            this.errors.voters =
+              errors["authorization_rules"][0] + " is not an email address";
           } else {
-            this.errors.rules = this.errors.rules.map(() => ({ value: null }));
+            this.errors.voters = null;
           }
         }
       );

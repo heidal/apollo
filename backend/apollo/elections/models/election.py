@@ -15,9 +15,14 @@ from apollo.elections.crypto import decrypt, CryptoError
 
 class Election(models.Model):
     class State(Choices):
+        # note: choice must be a string to work with django_fsm
         CREATED = Choice("0", "CREATED")
         OPENED = Choice("1", "OPENED")
         CLOSED = Choice("2", "CLOSED")
+
+    class Visibility(Choices):
+        PRIVATE = Choice(0, "PRIVATE")
+        PUBLIC = Choice(1, "PUBLIC")
 
     created_at = models.DateTimeField(auto_now_add=True)
     opened_at = models.DateTimeField(null=True)
@@ -26,6 +31,9 @@ class Election(models.Model):
     title = models.CharField(max_length=200)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="elections")
     state = FSMField(default=State.CREATED)
+    visibility = models.PositiveSmallIntegerField(
+        choices=Visibility.choices, default=Visibility.PRIVATE
+    )
     public_key = models.CharField(max_length=64, null=True, blank=False)
     secret_key = models.CharField(max_length=64, null=True, blank=False)
 
@@ -84,7 +92,6 @@ class Election(models.Model):
 class VoterAuthorizationRule(models.Model):
     class Type(Choices):
         EXACT = Choice(0, "EXACT")
-        REGEX = Choice(1, "REGEX")
 
     election = models.ForeignKey(
         Election, on_delete=models.CASCADE, related_name="authorization_rules"
@@ -96,6 +103,4 @@ class VoterAuthorizationRule(models.Model):
     def is_authorized(self, name: str) -> bool:
         if self.type == self.Type.EXACT:
             return self.value == name
-        elif self.type == self.Type.REGEX:
-            return regex.fullmatch(self.value, name) is not None
         raise ValueError("VoterAuthorizationRule.Type invalid type")

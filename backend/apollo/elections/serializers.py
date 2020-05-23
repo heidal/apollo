@@ -92,12 +92,6 @@ class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"type": "INVALID_RULE_TYPE"})
 
         attrs["type"] = rule_type
-        if attrs["type"] == VoterAuthorizationRule.Type.REGEX:
-            try:
-                re.compile(attrs["value"])
-            except Exception:
-                raise serializers.ValidationError({"value": "INVALID_REGEX"})
-
         return super().validate(attrs)
 
 
@@ -111,6 +105,7 @@ class ElectionSerializer(
     created_at = serializers.DateTimeField(read_only=True)
     authorization_rules = VoterAuthorizationRuleSerializer(many=True, allow_null=True)
     permissions = serializers.SerializerMethodField()
+    visibility = serializers.CharField()
 
     class Meta:
         model = Election
@@ -126,8 +121,13 @@ class ElectionSerializer(
             "created_at",
             "authorization_rules",
             "permissions",
+            "visibility",
         ]
         read_only_fields = ["public_key"]
+
+    @staticmethod
+    def validate_visibility(visibility: str) -> int:
+        return getattr(Election.Visibility, visibility)
 
     def get_is_owned(self, election: Election) -> bool:
         return self.context["request"].user == election.author
@@ -159,6 +159,11 @@ class ElectionSerializer(
             user_permissions.append("CAN_VOTE")
 
         return user_permissions
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["visibility"] = Election.Visibility.choices[int(data["visibility"])].label
+        return data
 
 
 class ElectionTransitionSerializer(serializers.ModelSerializer):

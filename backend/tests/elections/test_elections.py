@@ -19,6 +19,7 @@ ElectionPostData = TypedDict(
         "title": str,
         "authorization_rules": List[str],
         "questions": List[Dict],
+        "visibility": str,
     },
 )
 
@@ -30,6 +31,7 @@ def election_data() -> ElectionPostData:
         "title": "Election title",
         "authorization_rules": [],
         "questions": [],
+        "visibility": "PUBLIC",
     }
 
 
@@ -82,8 +84,7 @@ def _get_election_summary(election: Election, user: User) -> Response:
 
 
 @mark.django_db
-def test_create_election(election_data: ElectionPostData) -> None:
-    user = User.objects.create()
+def test_create_election(user: User, election_data: ElectionPostData) -> None:
     response = _create_election(election_data, user)
     assert response.status_code == status.HTTP_201_CREATED
     election = Election.objects.last()
@@ -150,3 +151,12 @@ def test_invalid_election_transitions(
 ) -> None:
     response = transition_function(_election, user)
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.data
+
+
+def test_private_elections_are_not_listed(
+    api_client: APIClient, election: Election, private_election: Election,
+) -> None:
+    response = api_client.get(reverse("elections:election-list"))
+    election_ids = set(e["id"] for e in response.data["results"])
+    assert private_election.id not in election_ids
+    assert election.id in election_ids
