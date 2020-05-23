@@ -1,5 +1,8 @@
 import { box } from "tweetnacl";
 import { decodeBase64, encodeBase64, decodeUTF8 } from "tweetnacl-util";
+
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+// @ts-ignore
 import blake from "blakejs/blake2b";
 
 function sealedBoxNonce(
