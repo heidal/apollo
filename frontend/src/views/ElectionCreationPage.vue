@@ -17,7 +17,14 @@
 
 import Vue from "vue";
 import ElectionForm from "@/components/ElectionForm.vue";
-import { Flow, AuthorizationRuleError, AuthorizationRuleApiError, ElectionFormData, AuthorizationRule, Question } from "@/components/ElectionForm.vue";
+import {
+  Flow,
+  AuthorizationRuleError,
+  AuthorizationRuleApiError,
+  ElectionFormData,
+  AuthorizationRule,
+  Question
+} from "@/components/ElectionForm.vue";
 
 export default Vue.extend({
   components: {
@@ -70,9 +77,11 @@ export default Vue.extend({
             this.goToQuestions();
           }
           if (errors["authorization_rules"] !== undefined) {
-            errors["authorization_rules"].forEach((e: AuthorizationRuleApiError, i: number) => {
-              this.errors.rules[i].value = this.getErrorString(e.value[0]);
-            });
+            errors["authorization_rules"].forEach(
+              (e: AuthorizationRuleApiError, i: number) => {
+                this.errors.rules[i].value = this.getErrorString(e.value[0]);
+              }
+            );
           } else {
             this.errors.rules = this.errors.rules.map(() => ({ value: null }));
           }
