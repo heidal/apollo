@@ -71,7 +71,6 @@ export default Vue.extend({
         value: null
       }));
     });
-    console.log(electionId);
   },
   methods: {
     onElectionSubmitted(election: ElectionFormData) {
