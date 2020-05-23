@@ -5,6 +5,7 @@ import Logout from "@/views/Logout.vue";
 import Signup from "@/views/Signup.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import ElectionCreationPage from "@/views/ElectionCreationPage.vue";
+import ElectionEditionPage from "@/views/ElectionEditionPage.vue";
 import ElectionsPage from "@/views/ElectionsPage.vue";
 import ElectionDetailPage from "@/views/ElectionDetailPage.vue";
 import ElectionResults from "@/views/ElectionResults.vue";
@@ -64,6 +65,12 @@ const routes = [
     path: "/create-election",
     name: "Create Election",
     component: ElectionCreationPage,
+    beforeEnter: authenticatedRouteGuard
+  },
+  {
+    path: "/edit-election/:electionId",
+    name: "Edit election",
+    component: ElectionEditionPage,
     beforeEnter: authenticatedRouteGuard
   },
   {

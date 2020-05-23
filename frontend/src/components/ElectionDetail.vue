@@ -99,7 +99,7 @@ export default Vue.extend({
   },
   methods: {
     editElection() {
-      alert("Editing election not implemented yet");
+      this.$router.push(`/edit-election/${this.election.id}/`);
     },
     openElection() {
       this.$http
