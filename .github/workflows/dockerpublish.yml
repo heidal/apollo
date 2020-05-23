@@ -74,10 +74,9 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose --file docker-compose-ci.yml build web
+          docker build -t votifica/apollo-web:latest -f ./docker/production/frontend/Dockerfile .
 
       - name: Tag & Push images
         if: github.event_name == 'push'
         run: |
-          docker build -t votifica/apollo-web:latest -f ./docker/production/frontend/Dockerfile .
           docker push votifica/apollo-web:latest

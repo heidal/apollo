@@ -1,6 +1,7 @@
 <template>
   <div>
     <election-form
+      v-if="election.id !== null"
       :errors="errors"
       :validated="validated"
       :election="election"
@@ -14,6 +15,7 @@
 </template>
 <script lang="ts">
 /* eslint-disable @typescript-eslint/camelcase */
+// TODO use a mixin or something to reuse the common logic.
 
 import Vue from "vue";
 import ElectionForm from "@/components/ElectionForm.vue";
@@ -60,33 +62,46 @@ export default Vue.extend({
       step: Flow.Election
     };
   },
+  created() {
+    const electionId = this.$router.currentRoute.params.electionId;
+    this.$http.get(`/api/elections/elections/${electionId}`).then(response => {
+      this.election = response.data;
+      this.election.authorizationRules = response.data["authorization_rules"];
+      this.errors.rules = this.election.authorizationRules.map(() => ({
+        value: null
+      }));
+    });
+  },
   methods: {
     onElectionSubmitted(election: ElectionFormData) {
-      const requestMethod = election.id ? this.$http.patch : this.$http.post;
-      requestMethod("/api/elections/elections/", election).then(
-        response => {
-          this.election = response.data;
-          this.$router.push(`/election-detail/${this.election.id}`);
-        },
-        error => {
-          const errors = error.response.data;
-          this.validated = true;
-          if (errors.description || errors.title) {
-            this.goToGeneralInfo();
-          } else if (errors.questions) {
-            this.goToQuestions();
+      this.$http
+        .patch(`/api/elections/elections/${election.id}/`, election)
+        .then(
+          response => {
+            this.election = response.data;
+            this.$router.push(`/election-detail/${this.election.id}`);
+          },
+          error => {
+            const errors = error.response.data;
+            this.validated = true;
+            if (errors.description || errors.title) {
+              this.goToGeneralInfo();
+            } else if (errors.questions) {
+              this.goToQuestions();
+            }
+            if (errors["authorization_rules"] !== undefined) {
+              errors["authorization_rules"].forEach(
+                (e: AuthorizationRuleApiError, i: number) => {
+                  this.errors.rules[i].value = this.getErrorString(e.value[0]);
+                }
+              );
+            } else {
+              this.errors.rules = this.errors.rules.map(() => ({
+                value: null
+              }));
+            }
           }
-          if (errors["authorization_rules"] !== undefined) {
-            errors["authorization_rules"].forEach(
-              (e: AuthorizationRuleApiError, i: number) => {
-                this.errors.rules[i].value = this.getErrorString(e.value[0]);
-              }
-            );
-          } else {
-            this.errors.rules = this.errors.rules.map(() => ({ value: null }));
-          }
-        }
-      );
+        );
     },
     getErrorString(errorKey: string) {
       const errorMap = {

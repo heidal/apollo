@@ -16,18 +16,18 @@
       </b-card-text>
       <b-form v-if="election !== null" @submit.prevent="voteInElection()">
         <b-form-group
-          :label="`Question #${i + 1}`"
           v-for="(question, i) in election.questions"
           :key="i"
+          :label="`Question #${i + 1}`"
         >
           <h3>{{ question.question }}</h3>
           <b-form-radio
-            required
             v-for="(answer, ai) in question.answers"
             :key="ai"
+            v-model="votes[i].selected"
+            required
             :name="`answer.${i}`"
             :value="`${question.id}.${answer.id}`"
-            v-model="votes[i].selected"
             >{{ answer.text }}</b-form-radio
           >
         </b-form-group>
@@ -57,11 +57,14 @@ export interface Vote {
 export default Vue.component("vote-form", {
   props: {
     election: ApiElection,
-    voteError: String,
+    voteError: {
+      type: String,
+      default: null
+    }
   },
   data() {
     return {
-      votes: [] as Array<Vote>,
+      votes: [] as Array<Vote>
     };
   },
   created() {
@@ -70,7 +73,7 @@ export default Vue.component("vote-form", {
   methods: {
     voteInElection() {
       this.$emit("votesSubmitted", this.votes);
-    },
-  },
+    }
+  }
 });
 </script>

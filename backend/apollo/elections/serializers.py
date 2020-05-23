@@ -1,7 +1,7 @@
-from typing import Dict, List
-
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+import re
+from typing import Dict, List
 
 from apollo.elections import permissions
 
@@ -112,10 +112,16 @@ class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
         try:
             rule_type = getattr(VoterAuthorizationRule.Type, rule_type)
         except AttributeError:
-            raise serializers.ValidationError("INVALID_RULE_TYPE")
-        else:
-            attrs["type"] = rule_type
-            return super().validate(attrs)
+            raise serializers.ValidationError({"type": "INVALID_RULE_TYPE"})
+
+        attrs["type"] = rule_type
+        if attrs["type"] == VoterAuthorizationRule.Type.REGEX:
+            try:
+                re.compile(attrs["value"])
+            except Exception:
+                raise serializers.ValidationError({"value": "INVALID_REGEX"})
+
+        return super().validate(attrs)
 
 
 class ElectionSerializer(
@@ -164,6 +170,9 @@ class ElectionSerializer(
 
     def get_permissions(self, election: Election) -> List[str]:
         user = self.context["request"].user
+        if not user.is_authenticated:
+            return []
+
         user_permissions = []
 
         if permissions.can_edit_election(user, election):

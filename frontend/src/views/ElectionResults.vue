@@ -7,7 +7,7 @@
 }
 </style>
 <template>
-  <b-card class="election-results" :title="election.title" v-if="election">
+  <b-card v-if="election" class="election-results" :title="election.title">
     <b-card-body>
       <b-card-text>
         <p>{{ election.description }}</p>
@@ -31,29 +31,29 @@ import Vue from "vue";
 import { ApiElectionSummary } from "@/api/elections";
 
 export default Vue.extend({
-  data: function () {
+  data: function() {
     return {
       election: null as ApiElectionSummary | null,
       fields: [
         {
           key: "votes",
-          sortable: true,
+          sortable: true
         },
         {
           key: "text",
           label: "Answer",
-          sortable: true,
-        },
-      ],
+          sortable: true
+        }
+      ]
     };
   },
-  created: function () {
+  created: function() {
     const electionId = this.$router.currentRoute.params.electionId;
     this.$http
       .get(`/api/elections/elections/${electionId}/summary`)
-      .then((response) => {
+      .then(response => {
         this.election = response.data;
       });
-  },
+  }
 });
 </script>
