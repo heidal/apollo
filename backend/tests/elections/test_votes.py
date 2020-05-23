@@ -9,6 +9,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from apollo.elections.models import Answer, Vote, Election
+from apollo.elections.crypto import CryptoError
 
 VotePostData = TypedDict("VotePostData", {"answer": int, "election": int})
 
@@ -78,6 +79,26 @@ def test_cannot_create_for_non_existent_question(
     decrypt_mock.return_value = non_existent_answer_id
     response = _create_vote(api_client, vote_data, user)
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_cannot_use_another_election_key(
+    api_client: APIClient,
+    vote_data: VotePostData,
+    user: User,
+    decrypt_mock: MagicMock,
+    other_election: Election,
+) -> None:
+    vote_data["election"] = other_election.id
+    response = _create_vote(api_client, vote_data, user)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_crypto_error_during_answer_decryption(
+    api_client: APIClient, vote_data: VotePostData, user: User, decrypt_mock: MagicMock
+) -> None:
+    decrypt_mock.side_effect = CryptoError()
+    response = _create_vote(api_client, vote_data, user)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @mark.parametrize("param", ["answer", "election"])
