@@ -53,7 +53,7 @@ class VoteSerializer(
 ):
     def authorize(self, attrs):
         user = self.context["request"].user
-        election = attrs["answer"].question.election
+        election = attrs["question"].election
         if not permissions.can_vote_in_election(user, election):
             raise exceptions.PermissionDenied("VOTE_UNAUTHORIZED")
 
@@ -62,11 +62,11 @@ class VoteSerializer(
 
     class Meta:
         model = Vote
-        fields = ["id", "answer", "author", "question"]
+        fields = ["id", "answer_ciphertext", "author", "question"]
         read_only_fields = ["id"]
         validators = [
             UniqueTogetherValidator(
-                queryset=Vote.objects.all(), fields=["author", "answer"]
+                queryset=Vote.objects.all(), fields=["author", "question"]
             )
         ]
 

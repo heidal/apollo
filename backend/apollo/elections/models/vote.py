@@ -3,7 +3,7 @@ from django.db import models
 
 class Vote(models.Model):
     answer = models.ForeignKey(
-        "Answer", on_delete=models.CASCADE, blank=True, null=True
+        "Answer", on_delete=models.CASCADE, blank=True, null=True, related_name="votes"
     )
     answer_ciphertext = models.CharField(max_length=400)
     question = models.ForeignKey(

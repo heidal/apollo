@@ -48,4 +48,6 @@ class VoteFactory(factory.django.DjangoModelFactory):
         model = Vote
 
     answer = factory.SubFactory(AnswerFactory)
+    answer_ciphertext = factory.Faker("pystr")
     author = factory.SubFactory(UserFactory)
+    question = factory.SubFactory(QuestionFactory)
