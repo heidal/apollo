@@ -106,7 +106,7 @@ def test_cannot_be_created_without_logging_in(election_data: ElectionPostData) -
 
 
 @mark.parametrize(
-    "_election", [lazy_fixture("opened_election"), lazy_fixture("frozen_election")]
+    "_election", [lazy_fixture("opened_election"), lazy_fixture("closed_election")]
 )
 def test_cannot_be_edited_when_not_in_initial_state(
     _election: Election, election_data: ElectionPostData
@@ -118,20 +118,20 @@ def test_cannot_be_edited_when_not_in_initial_state(
 @mark.parametrize(
     "_election", [lazy_fixture("election"), lazy_fixture("opened_election")]
 )
-def test_cannot_get_summary_of_not_frozen_election(_election: Election) -> None:
+def test_cannot_get_summary_of_not_closed_election(_election: Election) -> None:
     response = _get_election_summary(_election, _election.author)
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_author_can_get_election_summary(frozen_election: Election) -> None:
-    response = _get_election_summary(frozen_election, frozen_election.author)
+def test_author_can_get_election_summary(closed_election: Election) -> None:
+    response = _get_election_summary(closed_election, closed_election.author)
     assert response.status_code == status.HTTP_200_OK
 
 
 def test_simple_user_can_get_election_summary(
-    frozen_election: Election, other_user: User
+    closed_election: Election, other_user: User
 ) -> None:
-    response = _get_election_summary(frozen_election, other_user)
+    response = _get_election_summary(closed_election, other_user)
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -140,8 +140,8 @@ def test_simple_user_can_get_election_summary(
     [
         (lazy_fixture("election"), _close_election),
         (lazy_fixture("opened_election"), _open_election),
-        (lazy_fixture("frozen_election"), _open_election),
-        (lazy_fixture("frozen_election"), _close_election),
+        (lazy_fixture("closed_election"), _open_election),
+        (lazy_fixture("closed_election"), _close_election),
     ],
 )
 def test_invalid_election_transitions(

@@ -27,7 +27,7 @@ register(
 )
 register(
     factories.ElectionFactory,
-    "frozen_election",
+    "closed_election",
     state=Election.State.CLOSED,
     visibility=Election.Visibility.PUBLIC,
 )
@@ -38,7 +38,11 @@ register(
 )
 
 register(factories.QuestionFactory)
+register(factories.QuestionFactory, "question_in_opened_election")
+register(factories.QuestionFactory, "question_in_closed_election")
 register(factories.AnswerFactory)
+register(factories.AnswerFactory, "answer_in_opened_election")
+
 register(factories.VoteFactory)
 
 register(factories.VoterAuthorizationRuleFactory)
@@ -47,3 +51,18 @@ register(factories.VoterAuthorizationRuleFactory)
 @fixture(scope="session")
 def api_client():
     return APIClient()
+
+
+@fixture
+def question_in_opened_election__election(opened_election):
+    return opened_election
+
+
+@fixture
+def question_in_closed_election__election(closed_election):
+    return closed_election
+
+
+@fixture
+def answer_in_opened_election__question(question_in_opened_election):
+    return question_in_opened_election

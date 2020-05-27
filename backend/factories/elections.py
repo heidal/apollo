@@ -35,9 +35,15 @@ class VoterAuthorizationRuleFactory(factory.django.DjangoModelFactory):
 class QuestionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Question
+        exclude = ["state"]
 
     question = factory.Faker("text")
-    election = factory.SubFactory(ElectionFactory)
+    election = factory.SubFactory(
+        ElectionFactory, state=factory.SelfAttribute("..state")
+    )
+    state = factory.fuzzy.FuzzyChoice(
+        choices=map(operator.itemgetter(0), Election.State.choices)
+    )
 
 
 class AnswerFactory(factory.django.DjangoModelFactory):

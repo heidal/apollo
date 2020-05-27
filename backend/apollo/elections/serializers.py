@@ -1,20 +1,15 @@
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
-import re
 from typing import Dict, List
 
-from apollo.elections import permissions
-
 import django_fsm
+from drf_writable_nested import serializers as nested
 from rest_framework import serializers, exceptions
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
-from drf_writable_nested import serializers as nested
+from apollo.common import serializers as apollo_serializers
+from apollo.elections import permissions
 from apollo.elections.models import Answer, Election, Question, Vote
 from apollo.elections.models.election import VoterAuthorizationRule
-from apollo.common import serializers as apollo_serializers
-from apollo.elections.crypto import decrypt, CryptoError
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -58,7 +53,9 @@ class VoteSerializer(
             raise exceptions.PermissionDenied("VOTE_UNAUTHORIZED")
 
     author = serializers.HiddenField(default=CurrentUserDefault())
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    question = serializers.PrimaryKeyRelatedField(
+        queryset=Question.objects.filter(election__state=Election.State.OPENED)
+    )
 
     class Meta:
         model = Vote

@@ -73,7 +73,7 @@ def test_question_cannot_be_added_by_non_authorized_users(
 
 @mark.django_db
 @mark.parametrize(
-    "_election", [lazy_fixture("opened_election"), lazy_fixture("frozen_election")]
+    "_election", [lazy_fixture("opened_election"), lazy_fixture("closed_election")]
 )
 def test_cannot_add_questions_to_election_if_not_state_created(
     _election: Election, question_data: QuestionPostData, user: User
