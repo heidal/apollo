@@ -53,45 +53,22 @@ class VoteSerializer(
 ):
     def authorize(self, attrs):
         user = self.context["request"].user
-        election = attrs["answer"].question.election
+        election = attrs["question"].election
         if not permissions.can_vote_in_election(user, election):
             raise exceptions.PermissionDenied("VOTE_UNAUTHORIZED")
 
-    answer = serializers.PrimaryKeyRelatedField(queryset=Answer.objects.all())
     author = serializers.HiddenField(default=CurrentUserDefault())
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
 
     class Meta:
         model = Vote
-        fields = ["id", "answer", "author"]
+        fields = ["id", "answer_ciphertext", "author", "question"]
         read_only_fields = ["id"]
         validators = [
             UniqueTogetherValidator(
-                queryset=Vote.objects.all(), fields=["author", "answer"]
+                queryset=Vote.objects.all(), fields=["author", "question"]
             )
         ]
-
-    def _decrypt_answer(self):
-        election = get_object_or_404(Election, pk=self.initial_data.pop("election"))
-        answer_id = decrypt(election.secret_key, self.initial_data["answer"])
-        answer = get_object_or_404(Answer, pk=answer_id)
-
-        if answer.question.election.id != election.id:
-            raise ValidationError()
-
-        return answer_id
-
-    def is_valid(self, raise_exception):
-        try:
-            answer_id = self._decrypt_answer()
-        except KeyError as e:
-            if raise_exception:
-                raise ValidationError(f"Missing parameter {e}")
-        except (CryptoError, ValidationError):
-            if raise_exception:
-                raise ValidationError()
-
-        self.initial_data["answer"] = answer_id
-        return super().is_valid(raise_exception)
 
 
 class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):

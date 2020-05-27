@@ -7,7 +7,10 @@ from django_utils.choices import Choices, Choice
 from nacl.public import PrivateKey
 from nacl.encoding import Base64Encoder
 
+from apollo.elections.models.vote import Vote
+from apollo.elections.models.answer import Answer
 from apollo.users.models import User
+from apollo.elections.crypto import decrypt, CryptoError
 
 
 class Election(models.Model):
@@ -44,6 +47,18 @@ class Election(models.Model):
             and not self.questions.filter(answers__isnull=True).exists()
         )
 
+    def _open_votes(self):
+        for vote in Vote.objects.filter(question__election=self):
+            try:
+                decrypted_answer_id = decrypt(self.secret_key, vote.answer_ciphertext)
+                answer = Answer.objects.get(pk=decrypted_answer_id)
+            except (CryptoError, Answer.DoesNotExist):
+                pass
+            else:
+                if answer.question.election == self:
+                    vote.answer = answer
+                    vote.save()
+
     @transition(
         field=state,
         source=State.CREATED,
@@ -59,6 +74,7 @@ class Election(models.Model):
     @transition(field=state, source=State.OPENED, target=State.CLOSED)
     def close(self) -> None:
         self.closed_at = now()
+        self._open_votes()
 
     @property
     def state_string(self) -> str:
