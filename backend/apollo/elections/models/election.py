@@ -52,11 +52,12 @@ class Election(models.Model):
             try:
                 decrypted_answer_id = decrypt(self.secret_key, vote.answer_ciphertext)
                 answer = Answer.objects.get(pk=decrypted_answer_id)
+            except (CryptoError, Answer.DoesNotExist):
+                pass
+            else:
                 if answer.question.election == self:
                     vote.answer = answer
                     vote.save()
-            except (CryptoError, Answer.DoesNotExist):
-                pass
 
     @transition(
         field=state,
