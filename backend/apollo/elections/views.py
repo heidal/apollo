@@ -1,9 +1,8 @@
 from typing import List
 
 from django.contrib.auth.models import AnonymousUser
-from django.db.models import QuerySet
-from django.db.models.expressions import Exists
-from django.db.models.query_utils import Q
+from django.db import models as dj_models
+from django.db.models import Q
 from django_filters import rest_framework as filters
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
@@ -50,7 +49,7 @@ class ElectionViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at"]
     ordering = ["-created_at"]
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> dj_models.QuerySet:
         if isinstance(self.request.user, AnonymousUser):
             return Election.objects.filter(visibility=Election.Visibility.PUBLIC)
 
@@ -58,10 +57,11 @@ class ElectionViewSet(viewsets.ModelViewSet):
             Q(visibility=Election.Visibility.PUBLIC)
             | Q(author=self.request.user)
             | Q(
-                Exists(
-                    VoterAuthorizationRule.objects.filter(
+                dj_models.Exists(
+                    VoterAuthorizationRule.objects.filter(  # TODO(adambudziak) reuse the logic
                         type=VoterAuthorizationRule.Type.EXACT,
                         value=self.request.user.email,
+                        election=dj_models.OuterRef("pk"),
                     )
                 )
             )

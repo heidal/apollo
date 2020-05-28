@@ -15,8 +15,13 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def election_with_voters_rules(
-    election, answer_factory, question_factory, voter_authorization_rule_factory, user
+    opened_election,
+    answer_factory,
+    question_factory,
+    voter_authorization_rule_factory,
+    user,
 ):
+    election = opened_election
     questions = question_factory.create_batch(5, election=election)
     for question in questions:
         answer_factory.create_batch(3, question=question)
@@ -25,16 +30,6 @@ def election_with_voters_rules(
         type=el_models.VoterAuthorizationRule.Type.EXACT, value=user, election=election
     )
     return election
-
-
-def test_unauthorized_user_cannot_vote(
-    api_client: APIClient, election_with_voters_rules: Election, vote_data: VotePostData
-):
-    vote_data["question"] = election_with_voters_rules.questions.first().id
-    response = api_client.post(
-        reverse("elections:vote-list"), data=vote_data, format="json"
-    )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_voter_authorized_in_one_election_cannot_vote_in_another(

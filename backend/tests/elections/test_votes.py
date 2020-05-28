@@ -81,7 +81,7 @@ def test_cannot_vote_in_not_opened_election(
     eligible_voter_factory,
     _question: el_models.Question,
 ):
-    voter = eligible_voter_factory(user, _question.election)
+    voter = eligible_voter_factory(user=user, election=_question.election)
     vote_data["question"] = _question.id
     response = _create_vote(api_client, vote_data, voter)
     assert response.status_code == status.HTTP_400_BAD_REQUEST

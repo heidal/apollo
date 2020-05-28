@@ -1,6 +1,5 @@
-import regex
-
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import now
 from django_fsm import FSMField, transition
 from django_utils.choices import Choices, Choice
@@ -88,10 +87,27 @@ class Election(models.Model):
     def state_string(self) -> str:
         return str(Election.State.choices[self.state])
 
+    def can_vote_in_election(self, user: User):
+        return self.authorization_rules.authorized(user).exists()
+
+
+class VoterAuthorizationRuleQuerySet(models.QuerySet):
+    @staticmethod
+    def authorization_filter(user: User):
+        return Q(type=VoterAuthorizationRule.Type.EXACT, value=user.email)
+
+    def authorized(self, user: User):
+        return self.filter(self.authorization_filter(user))
+
+    def unauthorized(self, user: User):
+        return self.exclude(self.authorization_filter(user))
+
 
 class VoterAuthorizationRule(models.Model):
     class Type(Choices):
         EXACT = Choice(0, "EXACT")
+
+    objects = VoterAuthorizationRuleQuerySet.as_manager()
 
     election = models.ForeignKey(
         Election, on_delete=models.CASCADE, related_name="authorization_rules"

@@ -49,7 +49,7 @@ class VoteSerializer(
     def authorize(self, attrs):
         user = self.context["request"].user
         election = attrs["question"].election
-        if not permissions.can_vote_in_election(user, election):
+        if not election.can_vote_in_election(user):
             raise exceptions.PermissionDenied("VOTE_UNAUTHORIZED")
 
     author = serializers.HiddenField(default=CurrentUserDefault())
@@ -152,7 +152,7 @@ class ElectionSerializer(
         if permissions.can_edit_election(user, election):
             user_permissions.append("CAN_EDIT")
 
-        if permissions.can_vote_in_election(user, election):
+        if election.can_vote_in_election(user):
             user_permissions.append("CAN_VOTE")
 
         return user_permissions

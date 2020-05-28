@@ -25,8 +25,13 @@ def vote_data(answer_in_opened_election: el_models.Answer) -> VotePostData:
 
 
 @fixture
-def eligible_voter_factory(voter_authorization_rule_factory):
-    def inner(user: User, election: el_models.Election):
+def eligible_voter_factory(
+    voter_authorization_rule_factory, election_factory, user_factory
+):
+    # TODO use factoryboy
+    def inner(*, user: User = None, election: el_models.Election = None):
+        user = user or user_factory()
+        election = election or election_factory()
         voter_authorization_rule_factory(
             election=election,
             value=user.email,
@@ -39,4 +44,4 @@ def eligible_voter_factory(voter_authorization_rule_factory):
 
 @fixture
 def eligible_voter(eligible_voter_factory, user, opened_election):
-    return eligible_voter_factory(user, opened_election)
+    return eligible_voter_factory(user=user, election=opened_election)

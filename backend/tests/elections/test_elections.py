@@ -1,10 +1,12 @@
 from typing import Optional, Callable, List, Dict
+from pytest_lazyfixture import lazy_fixture
 
-from pytest import mark, fixture, lazy_fixture
+from pytest import mark, fixture
 from rest_framework.response import Response
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 from rest_framework import status
+from apollo.elections import models as el_models
 from apollo.elections.models import Election
 from apollo.users.models import User
 from typing_extensions import TypedDict
@@ -160,3 +162,47 @@ def test_private_elections_are_not_listed(
     election_ids = set(e["id"] for e in response.data["results"])
     assert private_election.id not in election_ids
     assert election.id in election_ids
+
+
+class TestElectionList:
+    PRIVATE = el_models.Election.Visibility.PRIVATE
+    PUBLIC = el_models.Election.Visibility.PUBLIC
+
+    @fixture(autouse=True)
+    def elections_list(self, election_factory, eligible_voter_factory):
+        elections = election_factory.create_batch(5, visibility=self.PUBLIC)
+        elections.extend(election_factory.create_batch(5, visibility=self.PRIVATE))
+        voters = [
+            eligible_voter_factory(election=election) for election in elections[::2]
+        ]
+        return voters, elections
+
+    @staticmethod
+    def get_elections(api_client: APIClient, user: User = None):
+        if user:
+            api_client.force_authenticate(user=user)
+        return api_client.get(reverse("elections:election-list"))
+
+    def test_get_elections_list_unauthenticated(self, api_client: APIClient):
+        response = self.get_elections(api_client)
+        assert response.status_code == status.HTTP_200_OK
+        results = [el["id"] for el in response.data["results"]]
+        elections = el_models.Election.objects.filter(id__in=results)
+        assert not elections.filter(visibility=self.PRIVATE).exists()
+
+    def test_eligible_voters_can_see_private_elections(
+        self, api_client: APIClient, elections_list
+    ):
+        voters, elections = elections_list
+        user = voters[0]
+        response = self.get_elections(api_client, user)
+        assert response.status_code == status.HTTP_200_OK
+        results = set(el["id"] for el in response.data["results"])
+
+        available_elections_ids = [el.id for el in user.available_elections]
+        assert all(el_id in results for el_id in available_elections_ids)
+
+        unauthorized_private_elections = el_models.Election.objects.filter(
+            visibility=self.PRIVATE
+        ).exclude(id__in=available_elections_ids)
+        assert not any(el.id in results for el in unauthorized_private_elections)
