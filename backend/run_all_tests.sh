@@ -15,4 +15,4 @@ fi
 $COMPOSE python manage.py makemigrations --check
 $COMPOSE black --check .
 $COMPOSE mypy apollo
-$COMPOSE python manage.py test --settings config.settings.test
+$COMPOSE pytest

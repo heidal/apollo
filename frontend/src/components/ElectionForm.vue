@@ -48,11 +48,12 @@
             >
             </b-form-textarea>
           </b-form-group>
-          <b-button
-            ref="generalInfoForm"
-            type="submit"
-            variant="primary"
-            style="float: right;"
+          <b-form-group label="Election visibility">
+            <b-form-checkbox v-model="election.public" switch>
+              {{ election.public ? "Public" : "Private" }}
+            </b-form-checkbox>
+          </b-form-group>
+          <b-button type="submit" variant="primary" style="float: right;"
             >Go to questions</b-button
           >
         </b-form>
@@ -145,81 +146,29 @@
               >Add another question</b-button
             >
           </b-form-group>
-          <b-button
-            ref="questionsForm"
-            type="submit"
-            variant="primary"
-            style="float: right;"
+          <b-button type="submit" variant="primary" style="float: right;"
             >Go to voters</b-button
           >
         </b-form>
         <b-form v-else-if="isAddingVoters()" @submit.prevent="submitElection()">
           <b-form-group
-            v-for="(e, i) in election.authorizationRules.length"
-            :key="`rule-${i}`"
-            :label="`Rule #${i + 1}`"
+            label="Specify voters emails"
           >
-            <b-container class="pr-0">
-              <b-row align-v="stretch" align-h="start" no-gutters>
-                <b-col cols="1">
-                  <b-button
-                    :variant="
-                      election.authorizationRules.length <= 1
-                        ? 'outline-dark'
-                        : 'danger'
-                    "
-                    :disabled="election.authorizationRules.length <= 1"
-                    @click="() => deleteRule(i)"
-                    ><b-icon-trash></b-icon-trash
-                  ></b-button>
-                </b-col>
-                <b-col cols="3">
-                  <b-form-select
-                    v-model="election.authorizationRules[i].type"
-                    :options="ruleTypes"
-                  ></b-form-select>
-                </b-col>
-                <b-col>
-                  <b-form-input
-                    :id="`rule-${i + 1}`"
-                    v-model="election.authorizationRules[i].value"
-                    type="text"
-                    :state="errors.rules[i].value === null"
-                    required
-                    placeholder="Type the rule"
-                  >
-                  </b-form-input>
-                </b-col>
-              </b-row>
-            </b-container>
-            <b-form-invalid-feedback
-              :state="errors.rules[i].value === null"
-              style="text-align: right"
+            <b-form-textarea
+              v-model="election.voters"
+              placeholder="example@votifica.com"
+              rows="6"
             >
-              {{ errors.rules[i].value }}
+            </b-form-textarea>
+            <b-form-invalid-feedback :state="errors.voters === null">
+              {{ errors.voters }}
             </b-form-invalid-feedback>
-            <div
-              v-if="i === election.authorizationRules.length - 1"
-              class="add-answer-wrapper"
-            >
-              <b-button
-                variant="outline-info"
-                size="sm"
-                style="float: right;"
-                @click="addAnotherRule()"
-                ><span class="glyphicon glyphicon-plus"
-                  ><b-icon-plus></b-icon-plus>Add another rule</span
-                ></b-button
-              >
-            </div>
           </b-form-group>
           <b-button
             type="submit"
-            :variant="
-              election.authorizationRules[0].value ? 'primary' : 'outline-dark'
-            "
+            :variant="election.voters.length ? 'primary' : 'outline-dark'"
             style="float: right;"
-            :disabled="!election.authorizationRules[0].value"
+            :disabled="election.voters.length === 0"
             >Submit election</b-button
           >
         </b-form>
@@ -251,16 +200,8 @@ export interface Question {
 
 export interface AuthorizationRule {
   id: number | null;
-  type: "REGEX" | "EXACT";
+  type: "EXACT";
   value: string | null;
-}
-
-export interface AuthorizationRuleError {
-  value: string | null;
-}
-
-export interface AuthorizationRuleApiError {
-  value: Array<string>;
 }
 
 export interface ElectionFormData {
@@ -269,6 +210,7 @@ export interface ElectionFormData {
   description: string;
   questions: Array<Question>;
   authorization_rules: Array<AuthorizationRule>;
+  visibility: "PUBLIC" | "PRIVATE";
 }
 
 export default Vue.component("election-form", {
@@ -287,19 +229,14 @@ export default Vue.component("election-form", {
             visible: true
           }
         ] as Array<Question>,
-        authorizationRules: [
-          {
-            id: null,
-            type: "EXACT",
-            value: null
-          }
-        ] as Array<AuthorizationRule>
+        voters: "",
+        public: false
       })
     },
     errors: {
       type: Object,
       default: () => ({
-        rules: [{ value: null }] as Array<AuthorizationRuleError>
+        voters: null
       })
     },
     step: {
@@ -313,13 +250,18 @@ export default Vue.component("election-form", {
   },
   data: function() {
     return {
-      ruleTypes: ["REGEX", "EXACT"]
+      ruleTypes: ["EXACT"]
     };
   },
   methods: {
     submitElection() {
-      const electionForm = this.buildElectionForm();
-      this.$emit("electionSubmitted", electionForm);
+      const [success, voters] = this.validateVoters();
+      if (!success) {
+        this.errors.voters = voters;
+      } else {
+        const electionForm = this.buildElectionForm(voters);
+        this.$emit("electionSubmitted", electionForm);
+      }
     },
     isCreatingElection(): boolean {
       return this.step === Flow.Election;
@@ -338,14 +280,6 @@ export default Vue.component("election-form", {
         visible: true
       });
     },
-    addAnotherRule() {
-      this.election.authorizationRules.push({
-        id: null,
-        type: "EXACT",
-        value: null
-      });
-      this.errors.rules.push({ value: null });
-    },
     deleteQuestion(questionId: number) {
       if (this.election.questions.length <= 1) {
         return;
@@ -361,15 +295,6 @@ export default Vue.component("election-form", {
         answers.splice(answerId, 1);
       }
     },
-    deleteRule(ruleId: number) {
-      const rules = this.election.authorizationRules;
-      if (rules.length <= 1) {
-        return;
-      } else {
-        rules.splice(ruleId, 1);
-        this.errors.rules.splice(ruleId, 1);
-      }
-    },
     toggleCollapse(questionId: number) {
       this.election.questions[questionId].visible = !this.election.questions[
         questionId
@@ -380,17 +305,18 @@ export default Vue.component("election-form", {
         text: null
       });
     },
-    buildElectionForm(): ElectionFormData {
+    buildElectionForm(voters: Array<AuthorizationRule>): ElectionFormData {
       return {
         id: this.election.id,
         title: this.election.title,
         description: this.election.description,
-        authorization_rules: this.election.authorizationRules,
+        authorization_rules: voters,
         questions: this.election.questions.map((q: Question) => ({
           id: q.id,
           question: q.question,
           answers: q.answers
-        }))
+        })),
+        visibility: this.election.public ? "PUBLIC" : "PRIVATE"
       };
     },
     questionsSubmitButton() {
@@ -401,6 +327,21 @@ export default Vue.component("election-form", {
           this.election.questions[0].question.length === 0
       };
     },
+    validateVoters() {
+      const voters = this.election.voters
+        .split("\n")
+        .map((line: string) => line.trim())
+        .filter((line: string) => line.length > 0);
+      for (const voter of voters) {
+        if (!this.validateEmail(voter)) {
+          return [false, voter + " is not an email address"];
+        }
+      }
+      return [
+        true,
+        voters.map((voter: string) => ({ type: "EXACT", value: voter }))
+      ];
+    },
     goToGeneralInfo() {
       this.$emit("goToGeneralInfo");
     },
@@ -409,6 +350,11 @@ export default Vue.component("election-form", {
     },
     goToVoters() {
       this.$emit("goToVoters");
+    },
+    validateEmail(value: string): boolean {
+      return /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(
+        value
+      );
     }
   }
 });

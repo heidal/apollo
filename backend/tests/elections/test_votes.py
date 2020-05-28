@@ -1,40 +1,15 @@
-from typing import TypedDict
-
-from apollo.users.models import User
-from pytest import mark, fixture
+from pytest import mark
+from pytest_lazyfixture import lazy_fixture
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apollo.elections.models import Answer, Vote, Election
-
-VotePostData = TypedDict("VotePostData", {"answer_ciphertext": str, "question": int})
+from apollo.elections import models as el_models
+from apollo.users.models import User
+from tests.elections.conftest import VotePostData
+from tests.elections.utils import _create_vote
 
 pytestmark = mark.django_db
-
-
-@fixture
-def vote_data(answer: Answer) -> VotePostData:
-    return {"answer_ciphertext": "hello there", "question": answer.question.id}
-
-
-@fixture
-def eligible_voter(
-    user_factory, voter_authorization_rule_factory, election: Election
-) -> User:
-    user = user_factory()
-    voter_authorization_rule_factory(election=election, value=user.email)
-    return user
-
-
-def _create_vote(
-    api_client: APIClient, vote_data: VotePostData, user: User
-) -> Response:
-    api_client.force_authenticate(user=user)
-    return api_client.post(
-        reverse("elections:vote-list"), data=vote_data, format="json"
-    )
 
 
 def test_create_vote(
@@ -42,7 +17,7 @@ def test_create_vote(
 ) -> None:
     response = _create_vote(api_client, vote_data, eligible_voter)
     assert response.status_code == status.HTTP_201_CREATED
-    vote = Vote.objects.get(id=response.data["id"])
+    vote = el_models.Vote.objects.get(id=response.data["id"])
     assert all(
         (
             vote.answer_ciphertext == vote_data["answer_ciphertext"],
@@ -53,7 +28,7 @@ def test_create_vote(
 
 
 def test_create_vote_twice_on_the_same_question(
-    api_client: APIClient, vote: Vote
+    api_client: APIClient, vote: el_models.Vote
 ) -> None:
     response = _create_vote(
         api_client,
@@ -94,3 +69,19 @@ def test_unauthorized_user_cannot_vote(
 ) -> None:
     response = _create_vote(api_client, vote_data, user)
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@mark.parametrize(
+    "_question", [lazy_fixture("question"), lazy_fixture("question_in_closed_election")]
+)
+def test_cannot_vote_in_not_opened_election(
+    api_client: APIClient,
+    vote_data: VotePostData,
+    user: User,
+    eligible_voter_factory,
+    _question: el_models.Question,
+):
+    voter = eligible_voter_factory(user=user, election=_question.election)
+    vote_data["question"] = _question.id
+    response = _create_vote(api_client, vote_data, voter)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

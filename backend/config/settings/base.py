@@ -54,6 +54,7 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "rest_auth",
     "rest_auth.registration",
+    "reversion",
 ]
 
 PROJECT_APPS = [

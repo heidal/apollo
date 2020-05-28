@@ -1,5 +1,8 @@
 from typing import List
 
+from django.contrib.auth.models import AnonymousUser
+from django.db import models as dj_models
+from django.db.models import Q
 from django_filters import rest_framework as filters
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
@@ -10,6 +13,7 @@ from rest_framework.response import Response
 
 from apollo.common.permissions import get_default_permission_classes
 from apollo.elections.models import Answer, Election, Question, Vote
+from apollo.elections.models.election import VoterAuthorizationRule
 from apollo.elections.permissions import (
     CanAddQuestion,
     CanAddAnswer,
@@ -40,14 +44,35 @@ class AnswerViewSet(viewsets.ModelViewSet):
 
 
 class ElectionViewSet(viewsets.ModelViewSet):
-    queryset = Election.objects.all()
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ["author"]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self) -> dj_models.QuerySet:
+        if isinstance(self.request.user, AnonymousUser):
+            return Election.objects.filter(visibility=Election.Visibility.PUBLIC)
+
+        return Election.objects.filter(
+            Q(visibility=Election.Visibility.PUBLIC)
+            | Q(author=self.request.user)
+            | Q(
+                dj_models.Exists(
+                    VoterAuthorizationRule.objects.filter(  # TODO(adambudziak) reuse the logic
+                        type=VoterAuthorizationRule.Type.EXACT,
+                        value=self.request.user.email,
+                        election=dj_models.OuterRef("pk"),
+                    )
+                )
+            )
+        )
 
     def get_permissions(self) -> List[BasePermission]:
         permission_classes = get_default_permission_classes()
         if self.action in ("update", "partial_update", "delete"):
             permission_classes += [IsElectionAuthor & IsElectionMutable]  # type: ignore
         elif self.action in ("summary",):
-            permission_classes += [IsElectionClosed]  # type: ignore
+            permission_classes += [IsElectionClosed]
 
         return [perm() for perm in permission_classes]
 

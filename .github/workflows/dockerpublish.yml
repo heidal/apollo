@@ -51,7 +51,7 @@ jobs:
 
       - name: Run backend tests
         run: |
-          docker-compose --file docker-compose-ci.yml run --rm app python manage.py test --settings config.settings.test
+          docker-compose --file docker-compose-ci.yml run --rm app pytest
 
       - name: Tag & Push images
         if: github.event_name == 'push'

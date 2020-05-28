@@ -1,20 +1,15 @@
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
-import re
 from typing import Dict, List
 
-from apollo.elections import permissions
-
 import django_fsm
+from drf_writable_nested import serializers as nested
 from rest_framework import serializers, exceptions
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
-from drf_writable_nested import serializers as nested
+from apollo.common import serializers as apollo_serializers
+from apollo.elections import permissions
 from apollo.elections.models import Answer, Election, Question, Vote
 from apollo.elections.models.election import VoterAuthorizationRule
-from apollo.common import serializers as apollo_serializers
-from apollo.elections.crypto import decrypt, CryptoError
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -54,11 +49,13 @@ class VoteSerializer(
     def authorize(self, attrs):
         user = self.context["request"].user
         election = attrs["question"].election
-        if not permissions.can_vote_in_election(user, election):
+        if not election.can_vote_in_election(user):
             raise exceptions.PermissionDenied("VOTE_UNAUTHORIZED")
 
     author = serializers.HiddenField(default=CurrentUserDefault())
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    question = serializers.PrimaryKeyRelatedField(
+        queryset=Question.objects.filter(election__state=Election.State.OPENED)
+    )
 
     class Meta:
         model = Vote
@@ -92,12 +89,6 @@ class VoterAuthorizationRuleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"type": "INVALID_RULE_TYPE"})
 
         attrs["type"] = rule_type
-        if attrs["type"] == VoterAuthorizationRule.Type.REGEX:
-            try:
-                re.compile(attrs["value"])
-            except Exception:
-                raise serializers.ValidationError({"value": "INVALID_REGEX"})
-
         return super().validate(attrs)
 
 
@@ -111,6 +102,7 @@ class ElectionSerializer(
     created_at = serializers.DateTimeField(read_only=True)
     authorization_rules = VoterAuthorizationRuleSerializer(many=True, allow_null=True)
     permissions = serializers.SerializerMethodField()
+    visibility = serializers.CharField()
 
     class Meta:
         model = Election
@@ -126,8 +118,13 @@ class ElectionSerializer(
             "created_at",
             "authorization_rules",
             "permissions",
+            "visibility",
         ]
         read_only_fields = ["public_key"]
+
+    @staticmethod
+    def validate_visibility(visibility: str) -> int:
+        return getattr(Election.Visibility, visibility)
 
     def get_is_owned(self, election: Election) -> bool:
         return self.context["request"].user == election.author
@@ -155,10 +152,15 @@ class ElectionSerializer(
         if permissions.can_edit_election(user, election):
             user_permissions.append("CAN_EDIT")
 
-        if permissions.can_vote_in_election(user, election):
+        if election.can_vote_in_election(user):
             user_permissions.append("CAN_VOTE")
 
         return user_permissions
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["visibility"] = Election.Visibility.choices[int(data["visibility"])].label
+        return data
 
 
 class ElectionTransitionSerializer(serializers.ModelSerializer):

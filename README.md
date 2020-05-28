@@ -10,7 +10,7 @@ First, you need to build the local base image by running `docker-compose build b
 
 ### Run tests
 
-`docker-compose run --rm app python manage.py test --settings config.settings.test`
+`docker-compose run --rm app pytest`
 
 or enter `./backend` and run `./run_all_tests.sh`
 

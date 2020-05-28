@@ -1,10 +1,12 @@
 from typing import Optional, Callable, List, Dict
+from pytest_lazyfixture import lazy_fixture
 
-from pytest import mark, fixture, lazy_fixture
+from pytest import mark, fixture
 from rest_framework.response import Response
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 from rest_framework import status
+from apollo.elections import models as el_models
 from apollo.elections.models import Election
 from apollo.users.models import User
 from typing_extensions import TypedDict
@@ -19,6 +21,7 @@ ElectionPostData = TypedDict(
         "title": str,
         "authorization_rules": List[str],
         "questions": List[Dict],
+        "visibility": str,
     },
 )
 
@@ -30,6 +33,7 @@ def election_data() -> ElectionPostData:
         "title": "Election title",
         "authorization_rules": [],
         "questions": [],
+        "visibility": "PUBLIC",
     }
 
 
@@ -82,8 +86,7 @@ def _get_election_summary(election: Election, user: User) -> Response:
 
 
 @mark.django_db
-def test_create_election(election_data: ElectionPostData) -> None:
-    user = User.objects.create()
+def test_create_election(user: User, election_data: ElectionPostData) -> None:
     response = _create_election(election_data, user)
     assert response.status_code == status.HTTP_201_CREATED
     election = Election.objects.last()
@@ -105,7 +108,7 @@ def test_cannot_be_created_without_logging_in(election_data: ElectionPostData) -
 
 
 @mark.parametrize(
-    "_election", [lazy_fixture("opened_election"), lazy_fixture("frozen_election")]
+    "_election", [lazy_fixture("opened_election"), lazy_fixture("closed_election")]
 )
 def test_cannot_be_edited_when_not_in_initial_state(
     _election: Election, election_data: ElectionPostData
@@ -117,20 +120,20 @@ def test_cannot_be_edited_when_not_in_initial_state(
 @mark.parametrize(
     "_election", [lazy_fixture("election"), lazy_fixture("opened_election")]
 )
-def test_cannot_get_summary_of_not_frozen_election(_election: Election) -> None:
+def test_cannot_get_summary_of_not_closed_election(_election: Election) -> None:
     response = _get_election_summary(_election, _election.author)
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_author_can_get_election_summary(frozen_election: Election) -> None:
-    response = _get_election_summary(frozen_election, frozen_election.author)
+def test_author_can_get_election_summary(closed_election: Election) -> None:
+    response = _get_election_summary(closed_election, closed_election.author)
     assert response.status_code == status.HTTP_200_OK
 
 
 def test_simple_user_can_get_election_summary(
-    frozen_election: Election, other_user: User
+    closed_election: Election, other_user: User
 ) -> None:
-    response = _get_election_summary(frozen_election, other_user)
+    response = _get_election_summary(closed_election, other_user)
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -139,8 +142,8 @@ def test_simple_user_can_get_election_summary(
     [
         (lazy_fixture("election"), _close_election),
         (lazy_fixture("opened_election"), _open_election),
-        (lazy_fixture("frozen_election"), _open_election),
-        (lazy_fixture("frozen_election"), _close_election),
+        (lazy_fixture("closed_election"), _open_election),
+        (lazy_fixture("closed_election"), _close_election),
     ],
 )
 def test_invalid_election_transitions(
@@ -150,3 +153,56 @@ def test_invalid_election_transitions(
 ) -> None:
     response = transition_function(_election, user)
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.data
+
+
+def test_private_elections_are_not_listed(
+    api_client: APIClient, election: Election, private_election: Election,
+) -> None:
+    response = api_client.get(reverse("elections:election-list"))
+    election_ids = set(e["id"] for e in response.data["results"])
+    assert private_election.id not in election_ids
+    assert election.id in election_ids
+
+
+class TestElectionList:
+    PRIVATE = el_models.Election.Visibility.PRIVATE
+    PUBLIC = el_models.Election.Visibility.PUBLIC
+
+    @fixture(autouse=True)
+    def elections_list(self, election_factory, eligible_voter_factory):
+        elections = election_factory.create_batch(5, visibility=self.PUBLIC)
+        elections.extend(election_factory.create_batch(5, visibility=self.PRIVATE))
+        voters = [
+            eligible_voter_factory(election=election) for election in elections[::2]
+        ]
+        return voters, elections
+
+    @staticmethod
+    def get_elections(api_client: APIClient, user: User = None):
+        if user:
+            api_client.force_authenticate(user=user)
+        return api_client.get(reverse("elections:election-list"))
+
+    def test_get_elections_list_unauthenticated(self, api_client: APIClient):
+        response = self.get_elections(api_client)
+        assert response.status_code == status.HTTP_200_OK
+        results = [el["id"] for el in response.data["results"]]
+        elections = el_models.Election.objects.filter(id__in=results)
+        assert not elections.filter(visibility=self.PRIVATE).exists()
+
+    def test_eligible_voters_can_see_private_elections(
+        self, api_client: APIClient, elections_list
+    ):
+        voters, elections = elections_list
+        user = voters[0]
+        response = self.get_elections(api_client, user)
+        assert response.status_code == status.HTTP_200_OK
+        results = set(el["id"] for el in response.data["results"])
+
+        available_elections_ids = [el.id for el in user.available_elections]
+        assert all(el_id in results for el_id in available_elections_ids)
+
+        unauthorized_private_elections = el_models.Election.objects.filter(
+            visibility=self.PRIVATE
+        ).exclude(id__in=available_elections_ids)
+        assert not any(el.id in results for el in unauthorized_private_elections)
