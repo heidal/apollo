@@ -88,7 +88,7 @@ class Election(models.Model):
         return str(Election.State.choices[self.state])
 
     def can_vote_in_election(self, user: User):
-        return self.authorization_rules.authorized(user).exists()
+        return self.authorization_rules.authorized(user).exists()  # type: ignore
 
 
 class VoterAuthorizationRuleQuerySet(models.QuerySet):
