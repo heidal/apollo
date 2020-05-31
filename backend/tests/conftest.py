@@ -22,7 +22,7 @@ register(
 register(
     factories.ElectionFactory,
     "opened_election",
-    state=Election.State.OPENED,
+    open=True,
     visibility=Election.Visibility.PUBLIC,
 )
 register(
@@ -66,3 +66,13 @@ def question_in_closed_election__election(closed_election):
 @fixture
 def answer_in_opened_election__question(question_in_opened_election):
     return question_in_opened_election
+
+
+@fixture
+def election_with_votes(election, answer_factory, vote_factory):
+    for i in range(3):
+        answer_factory.create_batch(3, question__election=election)
+
+    election.open()
+
+

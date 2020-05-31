@@ -13,12 +13,23 @@ class ElectionFactory(factory.django.DjangoModelFactory):
 
     title = factory.Faker("name")
     author = factory.SubFactory(UserFactory)
-    state = factory.fuzzy.FuzzyChoice(
-        choices=map(operator.itemgetter(0), Election.State.choices)
-    )
+    state = Election.State.CREATED
     visibility = factory.fuzzy.FuzzyChoice(
         choices=map(operator.itemgetter(0), Election.Visibility.choices)
     )
+
+    class Params:
+        open = factory.Trait()
+
+    @factory.post_generation
+    def open(self, create, extracted, **kwargs):
+        if extracted is not True:
+            return
+
+        for _ in range(3):
+            AnswerFactory.create_batch(3, question__election=self)
+
+        self.open()
 
 
 class VoterAuthorizationRuleFactory(factory.django.DjangoModelFactory):

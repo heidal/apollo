@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
+import apollo.elections.models.vote
 from apollo.elections import models as el_models
 from apollo.users.models import User
 from tests.elections.conftest import VotePostData
@@ -85,3 +86,22 @@ def test_cannot_vote_in_not_opened_election(
     vote_data["question"] = _question.id
     response = _create_vote(api_client, vote_data, voter)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_voter_is_created_on_first_vote(
+    api_client: APIClient,
+    vote_data: VotePostData,
+    opened_election: el_models.Election,
+    eligible_voter: User,
+):
+    response = _create_vote(api_client, vote_data, eligible_voter)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    voter = apollo.elections.models.vote.Voter.objects.last()
+    assert all((
+        voter.user == eligible_voter,
+        voter.election == opened_election
+    ))
+
+
+

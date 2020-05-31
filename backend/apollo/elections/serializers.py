@@ -6,9 +6,12 @@ from rest_framework import serializers, exceptions
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
+import apollo.elections.models.vote
 from apollo.common import serializers as apollo_serializers
 from apollo.elections import permissions
 from apollo.elections.models import Answer, Election, Question, Vote
+from apollo.elections import models as el_models
+
 from apollo.elections.models.election import VoterAuthorizationRule
 
 
@@ -183,12 +186,20 @@ class ElectionTransitionSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class BulletinBoardVoterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = apollo.elections.models.vote.Voter
+        fields = ["pseudonym", "created_at", "vote_ciphertext_hash"]
+        read_only_fields = fields
+
+
 class AnswerSummarySerializer(serializers.ModelSerializer):
     votes = serializers.SerializerMethodField()
 
     class Meta:
         model = Answer
         fields = ["id", "votes", "text"]
+        read_only_fields = fields
 
     @staticmethod
     def get_votes(answer: Answer) -> int:
@@ -201,6 +212,7 @@ class QuestionSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ["id", "answers", "question"]
+        read_only_fields = fields
 
 
 class ElectionSummarySerializer(serializers.ModelSerializer):
@@ -209,3 +221,4 @@ class ElectionSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Election
         fields = ["id", "description", "title", "questions"]
+        read_only_fields = fields
