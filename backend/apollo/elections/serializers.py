@@ -186,11 +186,26 @@ class ElectionTransitionSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class BulletinBoardVoterSerializer(serializers.ModelSerializer):
+class BulletinBoardVoteSerializer(serializers.ModelSerializer):
+    pseudonym = serializers.SerializerMethodField()
+    message = serializers.SerializerMethodField()
+
     class Meta:
-        model = apollo.elections.models.vote.Voter
-        fields = ["pseudonym", "created_at", "vote_ciphertext_hash"]
+        model = el_models.Vote
+        fields = ["pseudonym", "created_at", "question", "message"]
         read_only_fields = fields
+
+    @staticmethod
+    def get_voter(vote: el_models.Vote) -> el_models.Voter:
+        election = vote.question.election
+        return vote.author.voters.get(election=election)
+
+    def get_pseudonym(self, vote: el_models.Vote):
+        return self.get_voter(vote).pseudonym
+
+    @staticmethod
+    def get_message(vote: el_models.Vote):
+        return vote.answer_ciphertext
 
 
 class AnswerSummarySerializer(serializers.ModelSerializer):

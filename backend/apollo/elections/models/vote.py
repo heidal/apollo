@@ -34,7 +34,7 @@ class Vote(models.Model):
 class Voter(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     election = models.ForeignKey('elections.Election', on_delete=models.CASCADE, null=False, related_name="voters")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name="voters")
     seed = models.BinaryField(max_length=SEED_BYTE_SIZE, null=False, editable=False)
 
     class Meta:
@@ -59,11 +59,3 @@ class Voter(models.Model):
         hasher.update(self.seed_hash)
         hasher.update(self.user.email.encode('utf-8'))
         return base64.b64encode(hasher.digest())  # TODO(adambudziak) temporary, possibly we want a different encoding
-
-    @property
-    def vote_ciphertext_hash(self) -> str:
-        hasher = hashlib.sha3_256()
-        votes = self.user.votes.filter(question__election=self.election)
-        for vote in votes:
-            hasher.update(vote.answer_ciphertext.encode('utf-8'))
-        return base64.b64encode(hasher.digest())

@@ -227,18 +227,19 @@ class TestBulletinBoard:
         return api_client.get(reverse("elections:election-bulletin-board", kwargs={"pk": election.id}))
 
     def test_contains_voters(self, api_client: APIClient, opened_election: Election):
-        voters = opened_election.voters.order_by("-created_at")
+        votes = el_models.Vote.objects.filter(question__election=opened_election).order_by("-created_at")
 
         response = self.get_bulletin_board(api_client, opened_election)
         assert response.status_code == status.HTTP_200_OK
         board = response.data
         assert board == [
             {
-                "pseudonym": voter.pseudonym,
-                "created_at": voter.created_at.isoformat().replace('+00:00', 'Z'),
-                "vote_ciphertext_hash": voter.vote_ciphertext_hash
+                "pseudonym": vote.author.voters.get(election=opened_election).pseudonym,
+                "created_at": vote.created_at.isoformat().replace('+00:00', 'Z'),
+                "message": vote.answer_ciphertext,
+                "question": vote.question_id,
             }
-            for voter in voters
+            for vote in votes
         ]
 
     def test_other_elections_are_not_included(self, api_client: APIClient, opened_election, other_election_with_voters):

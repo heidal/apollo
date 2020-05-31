@@ -110,8 +110,8 @@ class ElectionViewSet(viewsets.ModelViewSet):
     @action(detail=True, url_path="bulletin-board", url_name='bulletin-board', methods=["get"])
     def get_bulletin_board(self, request: Request, pk: int = None) -> Response:
         election = self.get_object()
-        voters = election.voters.order_by('-created_at')
-        serializer = serializers.BulletinBoardVoterSerializer(voters, many=True)
+        votes = models.Vote.objects.filter(question__election=election).order_by("-created_at")
+        serializer = serializers.BulletinBoardVoteSerializer(votes, many=True)
         return Response(serializer.data)
 
 
