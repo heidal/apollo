@@ -74,5 +74,3 @@ def election_with_votes(election, answer_factory, vote_factory):
         answer_factory.create_batch(3, question__election=election)
 
     election.open()
-
-

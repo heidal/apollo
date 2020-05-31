@@ -25,24 +25,34 @@ class Vote(models.Model):
     def save(self, **kwargs):
         # TODO(adambudziak) this is not the best place for this
         super().save(**kwargs)
-        Voter.objects.get_or_create(
-            user=self.author,
-            election=self.question.election
-        )
+        Voter.objects.get_or_create(user=self.author, election=self.question.election)
 
 
 class Voter(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    election = models.ForeignKey('elections.Election', on_delete=models.CASCADE, null=False, related_name="voters")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name="voters")
+    election = models.ForeignKey(
+        "elections.Election",
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="voters",
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=False, related_name="voters"
+    )
     seed = models.BinaryField(max_length=SEED_BYTE_SIZE, null=False, editable=False)
 
     class Meta:
-        constraints = [UniqueConstraint(fields=["user", "election"], name="Unique voter constraint")]
+        constraints = [
+            UniqueConstraint(
+                fields=["user", "election"], name="Unique voter constraint"
+            )
+        ]
 
     def save(self, **kwargs):
         if self.seed is None:
-            self.seed = secrets.randbits(SEED_BIT_SIZE).to_bytes(SEED_BYTE_SIZE, byteorder='big')
+            self.seed = secrets.randbits(SEED_BIT_SIZE).to_bytes(
+                SEED_BYTE_SIZE, byteorder="big"
+            )
         super().save(**kwargs)
 
     @property
@@ -57,5 +67,7 @@ class Voter(models.Model):
     def pseudonym(self) -> str:
         hasher = hashlib.sha3_256()
         hasher.update(self.seed_hash)
-        hasher.update(self.user.email.encode('utf-8'))
-        return base64.b64encode(hasher.digest())  # TODO(adambudziak) temporary, possibly we want a different encoding
+        hasher.update(self.user.email.encode("utf-8"))
+        return base64.b64encode(hasher.digest()).decode(
+            "utf-8"
+        )  # TODO(adambudziak) temporary, possibly we want a different encoding

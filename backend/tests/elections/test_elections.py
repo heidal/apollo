@@ -224,10 +224,14 @@ class TestBulletinBoard:
 
     @staticmethod
     def get_bulletin_board(api_client: APIClient, election: Election):
-        return api_client.get(reverse("elections:election-bulletin-board", kwargs={"pk": election.id}))
+        return api_client.get(
+            reverse("elections:election-bulletin-board", kwargs={"pk": election.id})
+        )
 
     def test_contains_voters(self, api_client: APIClient, opened_election: Election):
-        votes = el_models.Vote.objects.filter(question__election=opened_election).order_by("-created_at")
+        votes = el_models.Vote.objects.filter(
+            question__election=opened_election
+        ).order_by("-created_at")
 
         response = self.get_bulletin_board(api_client, opened_election)
         assert response.status_code == status.HTTP_200_OK
@@ -235,14 +239,16 @@ class TestBulletinBoard:
         assert board == [
             {
                 "pseudonym": vote.author.voters.get(election=opened_election).pseudonym,
-                "created_at": vote.created_at.isoformat().replace('+00:00', 'Z'),
+                "created_at": vote.created_at.isoformat().replace("+00:00", "Z"),
                 "message": vote.answer_ciphertext,
                 "question": vote.question_id,
             }
             for vote in votes
         ]
 
-    def test_other_elections_are_not_included(self, api_client: APIClient, opened_election, other_election_with_voters):
+    def test_other_elections_are_not_included(
+        self, api_client: APIClient, opened_election, other_election_with_voters
+    ):
         voters = el_models.Voter.objects.exclude(election=opened_election)
 
         response = self.get_bulletin_board(api_client, opened_election)

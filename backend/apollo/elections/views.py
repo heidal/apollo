@@ -51,7 +51,9 @@ class ElectionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self) -> dj_models.QuerySet:
         if isinstance(self.request.user, AnonymousUser):
-            return models.Election.objects.filter(visibility=models.Election.Visibility.PUBLIC)
+            return models.Election.objects.filter(
+                visibility=models.Election.Visibility.PUBLIC
+            )
 
         return models.Election.objects.filter(
             Q(visibility=models.Election.Visibility.PUBLIC)
@@ -107,10 +109,17 @@ class ElectionViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    @action(detail=True, url_path="bulletin-board", url_name='bulletin-board', methods=["get"])
+    @action(
+        detail=True,
+        url_path="bulletin-board",
+        url_name="bulletin-board",
+        methods=["get"],
+    )
     def get_bulletin_board(self, request: Request, pk: int = None) -> Response:
         election = self.get_object()
-        votes = models.Vote.objects.filter(question__election=election).order_by("-created_at")
+        votes = models.Vote.objects.filter(question__election=election).order_by(
+            "-created_at"
+        )
         serializer = serializers.BulletinBoardVoteSerializer(votes, many=True)
         return Response(serializer.data)
 

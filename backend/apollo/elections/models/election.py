@@ -16,7 +16,6 @@ from apollo.elections.crypto import decrypt, CryptoError, SEED_BIT_SIZE, SEED_BY
 
 
 class Election(models.Model):
-
     class State(Choices):
         # note: choice must be a string to work with django_fsm
         CREATED = Choice("0", "CREATED")
@@ -39,7 +38,9 @@ class Election(models.Model):
     )
     public_key = models.CharField(max_length=64, null=True, blank=False)
     secret_key = models.CharField(max_length=64, null=True, blank=False)
-    seed = models.BinaryField(max_length=SEED_BYTE_SIZE, null=True, blank=False, editable=False)
+    seed = models.BinaryField(
+        max_length=SEED_BYTE_SIZE, null=True, blank=False, editable=False
+    )
 
     class Meta:
         ordering = ["created_at"]
@@ -81,7 +82,9 @@ class Election(models.Model):
         sk = PrivateKey.generate()
         self.secret_key = sk.encode(Base64Encoder()).decode("ascii")
         self.public_key = sk.public_key.encode(Base64Encoder()).decode("ascii")
-        self.seed = secrets.randbits(SEED_BIT_SIZE).to_bytes(SEED_BYTE_SIZE, byteorder='big')
+        self.seed = secrets.randbits(SEED_BIT_SIZE).to_bytes(
+            SEED_BYTE_SIZE, byteorder="big"
+        )
         self.opened_at = now()
 
     @transition(field=state, source=State.OPENED, target=State.CLOSED)
@@ -95,8 +98,10 @@ class Election(models.Model):
 
     @property
     def seed_hash(self) -> bytes:
+        if self.seed is None:
+            raise ValueError("Voter seed is None")
         hasher = hashlib.sha3_256()
-        hasher.update(bytes(self.seed))
+        hasher.update(self.seed)
         return hasher.digest()
 
     def can_vote_in_election(self, user: User):

@@ -9,7 +9,7 @@ def test_encrypt_decrypt(opened_election):
     message = base64.b64encode(b"Hello, world!")
     ciphertext = crypto.encrypt(opened_election.public_key, message)
     plaintext = crypto.decrypt(opened_election.secret_key, ciphertext)
-    assert plaintext == message.decode('utf-8')
+    assert plaintext == message.decode("utf-8")
 
 
 def test_public_key_cannot_be_used_for_decryption(opened_election):

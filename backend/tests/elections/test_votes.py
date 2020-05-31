@@ -98,10 +98,4 @@ def test_voter_is_created_on_first_vote(
     assert response.status_code == status.HTTP_201_CREATED
 
     voter = apollo.elections.models.vote.Voter.objects.last()
-    assert all((
-        voter.user == eligible_voter,
-        voter.election == opened_election
-    ))
-
-
-
+    assert all((voter.user == eligible_voter, voter.election == opened_election))

@@ -10,7 +10,7 @@ SEED_BYTE_SIZE = SEED_BIT_SIZE // 8
 
 
 def generate_seed():
-    return secrets.randbits(SEED_BIT_SIZE).to_bytes(SEED_BYTE_SIZE, byteorder='big')
+    return secrets.randbits(SEED_BIT_SIZE).to_bytes(SEED_BYTE_SIZE, byteorder="big")
 
 
 def generate_seed_for_opened_elections(apps, schema_editor):
@@ -18,7 +18,7 @@ def generate_seed_for_opened_elections(apps, schema_editor):
     elections = election_model.objects.exclude(state=0)
     for election in elections:
         election.seed = generate_seed()
-    election_model.objects.bulk_update(elections, ['seed'])
+    election_model.objects.bulk_update(elections, ["seed"])
 
 
 def create_voters_for_existing_votes(apps, schema_editor):
@@ -27,40 +27,64 @@ def create_voters_for_existing_votes(apps, schema_editor):
 
     votes = vote_model.objects.all().values("author", "question__election").distinct()
     for vote in votes:
-        voter_model.objects.get_or_create(user_id=vote["author"], election_id=vote["question__election"])
+        voter_model.objects.get_or_create(
+            user_id=vote["author"], election_id=vote["question__election"]
+        )
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('elections', '0010_election_visibility'),
+        ("elections", "0010_election_visibility"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='election',
-            name='seed',
+            model_name="election",
+            name="seed",
             field=models.BinaryField(max_length=32.0, null=True),
         ),
         migrations.RunPython(
             generate_seed_for_opened_elections, migrations.RunPython.noop
         ),
         migrations.CreateModel(
-            name='Voter',
+            name="Voter",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('seed', models.BinaryField(max_length=32.0)),
-                ('election', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='elections.Election')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("seed", models.BinaryField(max_length=32.0)),
+                (
+                    "election",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="elections.Election",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.RunPython(
             create_voters_for_existing_votes, migrations.RunPython.noop
         ),
         migrations.AddConstraint(
-            model_name='voter',
-            constraint=models.UniqueConstraint(fields=('user', 'election'), name='Unique voter constraint'),
+            model_name="voter",
+            constraint=models.UniqueConstraint(
+                fields=("user", "election"), name="Unique voter constraint"
+            ),
         ),
     ]
