@@ -99,7 +99,7 @@ class Election(models.Model):
     @property
     def seed_hash(self) -> bytes:
         if self.seed is None:
-            raise ValueError("Voter seed is None")
+            raise ValueError("Election seed is None")
         hasher = hashlib.sha3_256()
         hasher.update(self.seed)
         return hasher.digest()
