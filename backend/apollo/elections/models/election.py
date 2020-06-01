@@ -1,3 +1,6 @@
+import hashlib
+import secrets
+
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
@@ -9,7 +12,7 @@ from nacl.encoding import Base64Encoder
 from apollo.elections.models.vote import Vote
 from apollo.elections.models.answer import Answer
 from apollo.users.models import User
-from apollo.elections.crypto import decrypt, CryptoError
+from apollo.elections.crypto import decrypt, CryptoError, SEED_BIT_SIZE, SEED_BYTE_SIZE
 
 
 class Election(models.Model):
@@ -35,6 +38,9 @@ class Election(models.Model):
     )
     public_key = models.CharField(max_length=64, null=True, blank=False)
     secret_key = models.CharField(max_length=64, null=True, blank=False)
+    seed = models.BinaryField(
+        max_length=SEED_BYTE_SIZE, null=True, blank=False, editable=False
+    )
 
     class Meta:
         ordering = ["created_at"]
@@ -76,6 +82,9 @@ class Election(models.Model):
         sk = PrivateKey.generate()
         self.secret_key = sk.encode(Base64Encoder()).decode("ascii")
         self.public_key = sk.public_key.encode(Base64Encoder()).decode("ascii")
+        self.seed = secrets.randbits(SEED_BIT_SIZE).to_bytes(
+            SEED_BYTE_SIZE, byteorder="big"
+        )
         self.opened_at = now()
 
     @transition(field=state, source=State.OPENED, target=State.CLOSED)
@@ -86,6 +95,14 @@ class Election(models.Model):
     @property
     def state_string(self) -> str:
         return str(Election.State.choices[self.state])
+
+    @property
+    def seed_hash(self) -> bytes:
+        if self.seed is None:
+            raise ValueError("Election seed is None")
+        hasher = hashlib.sha3_256()
+        hasher.update(self.seed)
+        return hasher.digest()
 
     def can_vote_in_election(self, user: User):
         return self.authorization_rules.authorized(user).exists()  # type: ignore

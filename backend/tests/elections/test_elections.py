@@ -206,3 +206,53 @@ class TestElectionList:
             visibility=self.PRIVATE
         ).exclude(id__in=available_elections_ids)
         assert not any(el.id in results for el in unauthorized_private_elections)
+
+
+class TestBulletinBoard:
+    @fixture(autouse=True)
+    def election_with_voters(self, opened_election, vote_factory):
+        for _ in range(5):
+            vote_factory(question__election=opened_election)
+        return opened_election
+
+    @fixture
+    def other_election_with_voters(self, election_factory, vote_factory):
+        opened_election = election_factory(open=True)
+        for _ in range(5):
+            vote_factory(question__election=opened_election)
+        return opened_election
+
+    @staticmethod
+    def get_bulletin_board(api_client: APIClient, election: Election):
+        return api_client.get(
+            reverse("elections:election-bulletin-board", kwargs={"pk": election.id})
+        )
+
+    def test_contains_voters(self, api_client: APIClient, opened_election: Election):
+        votes = el_models.Vote.objects.filter(
+            question__election=opened_election
+        ).order_by("-created_at")
+
+        response = self.get_bulletin_board(api_client, opened_election)
+        assert response.status_code == status.HTTP_200_OK
+        board = response.data
+        assert board == [
+            {
+                "pseudonym": vote.author.voters.get(election=opened_election).pseudonym,
+                "created_at": vote.created_at.isoformat().replace("+00:00", "Z"),
+                "message": vote.answer_ciphertext,
+                "question": vote.question_id,
+            }
+            for vote in votes
+        ]
+
+    def test_other_elections_are_not_included(
+        self, api_client: APIClient, opened_election, other_election_with_voters
+    ):
+        voters = el_models.Voter.objects.exclude(election=opened_election)
+
+        response = self.get_bulletin_board(api_client, opened_election)
+        assert response.status_code == status.HTTP_200_OK
+        board = response.data
+        actual_pseudonyms = set(v["pseudonym"] for v in board)
+        assert not any(voter.pseudonym in actual_pseudonyms for voter in voters)

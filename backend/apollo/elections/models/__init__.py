@@ -5,4 +5,4 @@ from .election import (
     VoterAuthorizationRule as VoterAuthorizationRule,
 )
 from .question import Question as Question
-from .vote import Vote as Vote
+from .vote import Vote as Vote, Voter as Voter
