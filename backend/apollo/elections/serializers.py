@@ -1,6 +1,8 @@
+import base64
 from typing import Dict, List
 
 import django_fsm
+from django.contrib.auth.models import AnonymousUser
 from drf_writable_nested import serializers as nested
 from rest_framework import serializers, exceptions
 from rest_framework.fields import CurrentUserDefault
@@ -106,6 +108,7 @@ class ElectionSerializer(
     authorization_rules = VoterAuthorizationRuleSerializer(many=True, allow_null=True)
     permissions = serializers.SerializerMethodField()
     visibility = serializers.CharField()
+    did_vote = serializers.SerializerMethodField()
 
     class Meta:
         model = Election
@@ -122,6 +125,7 @@ class ElectionSerializer(
             "authorization_rules",
             "permissions",
             "visibility",
+            "did_vote",
         ]
         read_only_fields = ["public_key"]
 
@@ -130,7 +134,16 @@ class ElectionSerializer(
         return getattr(Election.Visibility, visibility)
 
     def get_is_owned(self, election: Election) -> bool:
+        user = self.context["request"].user
+        if isinstance(user, AnonymousUser):
+            return False
         return self.context["request"].user == election.author
+
+    def get_did_vote(self, election: Election) -> bool:
+        user = self.context["request"].user
+        if isinstance(user, AnonymousUser):
+            return False
+        return el_models.Voter.objects.filter(user=user, election=election).exists()
 
     @staticmethod
     def get_state(election: Election) -> str:
@@ -184,6 +197,29 @@ class ElectionTransitionSerializer(serializers.ModelSerializer):
         except django_fsm.TransitionNotAllowed:
             raise serializers.ValidationError("TRANSITION_NOT_ALLOWED")
         return attrs
+
+
+class ElectionUserMeSerializer(serializers.Serializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    election = serializers.PrimaryKeyRelatedField(
+        queryset=el_models.Election.objects.all()
+    )
+
+    def validate(self, attrs):
+        voter = el_models.Voter.objects.filter(
+            user=attrs["user"], election=attrs["election"]
+        ).first()
+        if not voter:
+            raise serializers.ValidationError("VOTER_DOES_NOT_EXIST")
+
+        attrs["user_seed_hash"] = base64.b64encode(voter.seed_hash)
+
+        return super().validate(attrs)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["user_seed_hash"] = self.validated_data["user_seed_hash"]
+        return data
 
 
 class BulletinBoardVoteSerializer(serializers.ModelSerializer):

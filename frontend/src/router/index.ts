@@ -10,6 +10,7 @@ import ElectionsPage from "@/views/ElectionsPage.vue";
 import ElectionDetailPage from "@/views/ElectionDetailPage.vue";
 import ElectionResults from "@/views/ElectionResults.vue";
 import VotePage from "@/views/VotePage.vue";
+import BulletinBoardPage from "@/views/BulletinBoardPage.vue";
 
 import store from "@/store";
 
@@ -60,6 +61,11 @@ const routes = [
     path: "/election-detail/:electionId/results",
     name: "Election results",
     component: ElectionResults
+  },
+  {
+    path: "/bulletin-board/:electionId",
+    name: "Bulletin board",
+    component: BulletinBoardPage
   },
   {
     path: "/create-election",

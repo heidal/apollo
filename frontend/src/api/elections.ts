@@ -23,6 +23,7 @@ export interface ApiElectionInterface {
   state: "CREATED" | "OPENED" | "CLOSED";
   is_owned: boolean;
   permissions: Array<string>;
+  did_vote: boolean;
 }
 
 export class ApiElection implements ApiElectionInterface {
@@ -35,6 +36,7 @@ export class ApiElection implements ApiElectionInterface {
   questions: ApiQuestion[];
   state: "CREATED" | "OPENED" | "CLOSED";
   title: string;
+  did_vote: boolean;
 
   constructor(
     created_at: string,
@@ -45,7 +47,8 @@ export class ApiElection implements ApiElectionInterface {
     public_key: string,
     questions: ApiQuestion[],
     state: "CREATED" | "OPENED" | "CLOSED",
-    title: string
+    title: string,
+    did_vote: boolean
   ) {
     this.created_at = created_at;
     this.description = description;
@@ -56,6 +59,7 @@ export class ApiElection implements ApiElectionInterface {
     this.questions = questions;
     this.state = state;
     this.title = title;
+    this.did_vote = did_vote;
   }
 }
 
