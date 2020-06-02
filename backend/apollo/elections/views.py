@@ -28,6 +28,7 @@ from apollo.elections.serializers import (
     VoteSerializer,
     ElectionSummarySerializer,
     ElectionTransitionSerializer,
+    ElectionUserMeSerializer,
 )
 
 
@@ -83,6 +84,8 @@ class ElectionViewSet(viewsets.ModelViewSet):
             return ElectionSummarySerializer
         elif self.action in ("open_election", "close_election"):
             return ElectionTransitionSerializer
+        elif self.action == "get_me":
+            return ElectionUserMeSerializer
         return ElectionSerializer
 
     @action(detail=True, url_path="open", methods=["post"])
@@ -107,6 +110,12 @@ class ElectionViewSet(viewsets.ModelViewSet):
     def summary(self, request: Request, pk: int = None) -> Response:
         instance: models.Election = self.get_object()
         serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @action(detail=True, url_name="me", url_path="me", methods=["get"])
+    def get_me(self, request: Request, pk: int = None) -> Response:
+        serializer = self.get_serializer(data={"election": pk})
+        serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
 
     @action(

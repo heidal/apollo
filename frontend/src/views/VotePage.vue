@@ -7,6 +7,8 @@
   ></election-vote-form>
 </template>
 <script lang="ts">
+/* eslint-disable @typescript-eslint/camelcase */
+
 import Vue from "vue";
 import { ApiElection } from "@/api/elections";
 import ElectionVoteForm, { Vote } from "@/components/ElectionVoteForm.vue";
@@ -42,13 +44,16 @@ export default Vue.extend({
         const [question, answer] = vote.selected.split(".");
 
         return this.$http.post("/api/elections/votes/", {
-          "answer_ciphertext": encrypt(this.election.public_key, answer),
-          "question": parseInt(question)
+          answer_ciphertext: encrypt(this.election.public_key, answer),
+          question: parseInt(question)
         });
       });
       Promise.all(results).then(
         () => {
-          this.$router.push("/");
+          const url = this.election
+            ? `/election-detail/${this.election.id}`
+            : "/";
+          this.$router.push(url);
         },
         error => {
           this.handleErrors(error);

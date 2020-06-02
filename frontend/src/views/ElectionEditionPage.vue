@@ -26,6 +26,11 @@ import {
   Question
 } from "@/components/ElectionForm.vue";
 
+interface ApiAuthorizationRule {
+  type: string;
+  value: string;
+}
+
 export default Vue.extend({
   components: {
     ElectionForm
@@ -61,7 +66,7 @@ export default Vue.extend({
       this.election = response.data;
       this.election.public = response.data["visibility"] === "PUBLIC";
       this.election.voters = response.data["authorization_rules"]
-        .map((rule: any) => rule.value)
+        .map((rule: ApiAuthorizationRule) => rule.value)
         .join("\n");
     });
   },

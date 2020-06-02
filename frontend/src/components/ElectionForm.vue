@@ -151,9 +151,7 @@
           >
         </b-form>
         <b-form v-else-if="isAddingVoters()" @submit.prevent="submitElection()">
-          <b-form-group
-            label="Specify voters emails"
-          >
+          <b-form-group label="Specify voters emails">
             <b-form-textarea
               v-model="election.voters"
               placeholder="example@votifica.com"
