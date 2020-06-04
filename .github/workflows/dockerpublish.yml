@@ -82,6 +82,8 @@ jobs:
           docker push votifica/apollo-web:latest
 
   deploy-backend:
+    runs-on: ubuntu-latest
+
     if: github.event_name == 'push'
 
     steps:
