@@ -57,8 +57,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           docker tag apollo_app votifica/apollo-app-test:latest votifica/apollo-app-test:${{ github.sha }}
-          docker push votifica/apollo-app-test:latest
-          docker push votifica/apollo-app-test:${{ github.sha }}
+          docker push votifica/apollo-app-test
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -105,5 +104,4 @@ jobs:
       - name: Tag & Push images
         if: github.event_name == 'push'
         run: |
-          docker push votifica/apollo-backend-prod:latest
-          docker push votifica/apollo-backend-prod:${{ github.sha }}
+          docker push votifica/apollo-backend-prod
