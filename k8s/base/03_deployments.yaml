@@ -37,7 +37,6 @@ spec:
             - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
             - --certificatesresolvers.myresolver.acme.email=adam.budziak@votifica.com
             - --certificatesresolvers.myresolver.acme.storage=acme.json
-            - --entrypoints.web.http.redirections.entrypoint.to=websecure
           ports:
             - name: web
               containerPort: 80
@@ -67,7 +66,8 @@ spec:
     spec:
       containers:
         - name: app
-          image: votifica/apollo-app:latest
+#          image: votifica/apollo-app:latest
+          image: votifica/apollo-backend-prod:latest
           imagePullPolicy: Always
           ports:
             - name: web
@@ -81,6 +81,12 @@ spec:
                 secretKeyRef:
                   name: apollo-secrets
                   key: POSTGRES_PASSWORD
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: apollo-secrets
+                  key: DJANGO_SECRET_KEY
+
 
 ---
 kind: Deployment
