@@ -56,10 +56,10 @@ jobs:
       - name: Tag & Push images
         if: github.event_name == 'push'
         run: |
-          docker tag apollo_app votifica/apollo-app:latest
-          docker push votifica/apollo-app:latest
+          docker tag apollo_app votifica/apollo-app-test:latest votifica/apollo-app-test:${{ github.sha }}
+          docker push votifica/apollo-app-test:latest votifica/apollo-app-test:${{ github.sha }}
 
-  test-frontend:
+  deploy-frontend:
     runs-on: ubuntu-latest
 
     steps:
@@ -80,3 +80,28 @@ jobs:
         if: github.event_name == 'push'
         run: |
           docker push votifica/apollo-web:latest
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Log into registry
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.DOCKER_TOKEN }}"
+
+      - name: Build Backend Production Image
+        run: |
+          docker build -t votifica/apollo-backend-prod:latest -t votifica/apollo-backend-prod:${{ github.sha }} \
+                       -f ./docker/production/backend/Dockerfile .
+
+      - name: Tag & Push images
+        if: github.event_name == 'push'
+        run: |
+          docker push votifica/apollo-backend-prod:latest votifica/apollo-backend-prod:${{ github.sha }}
