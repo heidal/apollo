@@ -49,6 +49,10 @@ jobs:
         run: |
           docker-compose --file docker-compose-ci.yml run --rm app mypy apollo
 
+      - name: Check python dependencies for known security vulnerabilities
+        run: |
+          docker-compose --file docker-compose-ci.yml run --rm app safety check
+
       - name: Run backend tests
         run: |
           docker-compose --file docker-compose-ci.yml run --rm app pytest
