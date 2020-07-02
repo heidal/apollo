@@ -69,7 +69,6 @@
           Send votes
         </b-button>
         <b-button
-          v-show="false"
           variant="outline-secondary"
           style="float: right;"
           @click="goToVoteForm()"
