@@ -34,18 +34,16 @@ export default Vue.extend({
   methods: {
     voteInElection: function(votes: Array<Vote>) {
       const results = votes.map(vote => {
-        if (vote.selected === null) {
+        if (vote.question === null || vote.answer === null) {
           return Promise.reject("Vote is null");
         }
         if (this.election === null) {
           return Promise.reject("Election is null");
         }
 
-        const [question, answer] = vote.selected.split(".");
-
         return this.$http.post("/api/elections/votes/", {
-          answer_ciphertext: encrypt(this.election.public_key, answer),
-          question: parseInt(question)
+          answer_ciphertext: encrypt(this.election.public_key, vote.answer.toString()),
+          question: vote.question
         });
       });
       Promise.all(results).then(

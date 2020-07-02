@@ -14,7 +14,8 @@
         <p>{{ election.description }}</p>
         <hr class="my-4" />
       </b-card-text>
-      <b-form v-if="election !== null" @submit.prevent="voteInElection()">
+
+      <b-form v-if="isOnVoteForm()" @submit.prevent="goToConfirmForm()">
         <b-form-group
           v-for="(question, i) in election.questions"
           :key="i"
@@ -24,10 +25,10 @@
           <b-form-radio
             v-for="(answer, ai) in question.answers"
             :key="ai"
-            v-model="votes[i].selected"
+            v-model="votes[i]"
             required
             :name="`answer.${i}`"
-            :value="`${question.id}.${answer.id}`"
+            :value="{ question: question.id, answer: answer.id }"
             >{{ answer.text }}</b-form-radio
           >
         </b-form-group>
@@ -36,12 +37,50 @@
           class="submit"
           variant="warning"
           style="float: right;"
-          >Send votes</b-button
+          >Go to confirm page</b-button
         >
         <b-form-invalid-feedback :state="voteError === null">
           {{ voteError }}
         </b-form-invalid-feedback>
       </b-form>
+
+      <b-form
+        v-if="isOnConfirmForm()"
+        @submit.prevent="voteInElection()">
+        <h2>
+          Your votes:
+        </h2>
+
+        <b-form-group
+          v-for="(question, i) in election.questions"
+          :key="i"
+          :label="`Question #${i + 1}`"
+        >
+          <h3>{{ question.question }}</h3>
+          <p>{{ question.answers.find(answer => answer.id === votes[i].answer).text }}</p>
+        </b-form-group>
+
+        <b-button
+          type="submit"
+          class="submit"
+          variant="warning"
+          style="float: right;"
+        >
+          Send votes
+        </b-button>
+        <b-button
+          v-show="false"
+          variant="outline-secondary"
+          style="float: right;"
+          @click="goToVoteForm()"
+        >
+          Go back
+        </b-button>
+        <b-form-invalid-feedback :state="voteError === null">
+          {{ voteError }}
+        </b-form-invalid-feedback>
+      </b-form>
+
     </b-card-body>
   </b-card>
 </template>
@@ -51,7 +90,13 @@ import Vue from "vue";
 import { ApiElection } from "@/api/elections";
 
 export interface Vote {
-  selected: string | null;
+  question: number | null,
+  answer: number | null
+}
+
+export enum Flow {
+  Vote,
+  Confirm
 }
 
 export default Vue.component("vote-form", {
@@ -64,15 +109,29 @@ export default Vue.component("vote-form", {
   },
   data() {
     return {
-      votes: [] as Array<Vote>
+      votes: [] as Array<Vote>,
+      step: Flow.Vote as Flow
     };
   },
   created() {
-    this.votes = this.election.questions.map(() => ({ selected: null }));
+    this.votes = this.election.questions.map(() => ({ question: null, answer: null } as Vote));
   },
   methods: {
     voteInElection() {
-      this.$emit("votesSubmitted", this.votes);
+      console.log(this.votes);
+      // this.$emit("votesSubmitted", this.votes);
+    },
+    goToVoteForm() {
+      this.step = Flow.Vote;
+    },
+    goToConfirmForm() {
+      this.step = Flow.Confirm;
+    },
+    isOnVoteForm(): boolean {
+      return this.step === Flow.Vote;
+    },
+    isOnConfirmForm(): boolean {
+      return this.step === Flow.Confirm;
     }
   }
 });
