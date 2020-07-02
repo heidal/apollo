@@ -57,7 +57,9 @@
           :label="`Question #${i + 1}`"
         >
           <h3>{{ question.question }}</h3>
-          <p>{{ question.answers.find(answer => answer.id === votes[i].answer).text }}</p>
+          <ul>
+            <li>{{ question.answers.find(answer => answer.id === votes[i].answer).text }}</li>
+          </ul>
         </b-form-group>
 
         <b-button
@@ -117,8 +119,7 @@ export default Vue.component("vote-form", {
   },
   methods: {
     voteInElection() {
-      console.log(this.votes);
-      // this.$emit("votesSubmitted", this.votes);
+      this.$emit("votesSubmitted", this.votes);
     },
     goToVoteForm() {
       this.step = Flow.Vote;
