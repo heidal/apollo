@@ -38,7 +38,8 @@ Whenever you make changes in apollo-crypto and you want them to be reflected in 
 
 ##### My `web` container doesn't get up
 Try entering the container via
-`docker-compose run --rm --entrypoint bash web` and running `yarn install`.
+`docker-compose run --rm --entrypoint sh web` and running `yarn install`.
+After that, restart the `web` container by running `docker-compose restart web`.
 
 ##### I have some weird stuff in my database that keeps breaking things
 You can clean the whole database by using `docker-compose down`.
