@@ -44,9 +44,7 @@
         </b-form-invalid-feedback>
       </b-form>
 
-      <b-form
-        v-if="isOnConfirmForm()"
-        @submit.prevent="voteInElection()">
+      <b-form v-if="isOnConfirmForm()" @submit.prevent="voteInElection()">
         <h2>
           Your votes:
         </h2>
@@ -58,7 +56,12 @@
         >
           <h3>{{ question.question }}</h3>
           <ul>
-            <li>{{ question.answers.find(answer => answer.id === votes[i].answer).text }}</li>
+            <li>
+              {{
+                question.answers.find(answer => answer.id === votes[i].answer)
+                  .text
+              }}
+            </li>
           </ul>
         </b-form-group>
 
@@ -81,7 +84,6 @@
           {{ voteError }}
         </b-form-invalid-feedback>
       </b-form>
-
     </b-card-body>
   </b-card>
 </template>
@@ -91,8 +93,8 @@ import Vue from "vue";
 import { ApiElection } from "@/api/elections";
 
 export interface Vote {
-  question: number | null,
-  answer: number | null
+  question: number | null;
+  answer: number | null;
 }
 
 export enum Flow {
@@ -115,7 +117,9 @@ export default Vue.component("vote-form", {
     };
   },
   created() {
-    this.votes = this.election.questions.map(() => ({ question: null, answer: null } as Vote));
+    this.votes = this.election.questions.map(
+      () => ({ question: null, answer: null } as Vote)
+    );
   },
   methods: {
     voteInElection() {

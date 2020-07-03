@@ -42,7 +42,10 @@ export default Vue.extend({
         }
 
         return this.$http.post("/api/elections/votes/", {
-          answer_ciphertext: encrypt(this.election.public_key, vote.answer.toString()),
+          answer_ciphertext: encrypt(
+            this.election.public_key,
+            vote.answer.toString()
+          ),
           question: vote.question
         });
       });
