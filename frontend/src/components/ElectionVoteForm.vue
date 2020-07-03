@@ -15,7 +15,7 @@
         <hr class="my-4" />
       </b-card-text>
 
-      <b-form v-if="isOnVoteForm()" @submit.prevent="goToConfirmForm()">
+      <b-form v-if="isOnVoteForm()" @submit.prevent="goToConfirmForm($event)">
         <b-form-group
           v-for="(question, i) in election.questions"
           :key="i"
@@ -73,7 +73,7 @@
         <b-button
           variant="outline-secondary"
           style="float: right;"
-          @click="goToVoteForm()"
+          @click="goToVoteForm($event)"
         >
           Go back
         </b-button>
@@ -121,10 +121,12 @@ export default Vue.component("vote-form", {
     voteInElection() {
       this.$emit("votesSubmitted", this.votes);
     },
-    goToVoteForm() {
+    goToVoteForm(event) {
       this.step = Flow.Vote;
+      event.preventDefault();
     },
-    goToConfirmForm() {
+    goToConfirmForm(event) {
+      event.preventDefault();
       this.step = Flow.Confirm;
     },
     isOnVoteForm(): boolean {
