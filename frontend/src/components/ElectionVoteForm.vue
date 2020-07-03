@@ -125,11 +125,11 @@ export default Vue.component("vote-form", {
     voteInElection() {
       this.$emit("votesSubmitted", this.votes);
     },
-    goToVoteForm(event) {
+    goToVoteForm(event: Event) {
       this.step = Flow.Vote;
       event.preventDefault();
     },
-    goToConfirmForm(event) {
+    goToConfirmForm(event: Event) {
       event.preventDefault();
       this.step = Flow.Confirm;
     },
